@@ -25,36 +25,43 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 public class CmdExecutor implements CommandExecutor
 {
-    private MultiNether netherrep;
+    private MultiNether multinether;
     private List<String> command_list;
     private List<World> world_list;
     private List<String> link_list;
     private List<String> config_path_list;
 	private List<Integer> portal_id_list;
 	private List<Portal> portal_list;
-	private FileConfiguration portal_config;
+	private String netherlink_path;
     
     public CmdExecutor(MultiNether plugin)
     {
-		this.netherrep = plugin;
-		this.command_list = netherrep.command_list;
+		this.multinether = plugin;
+		this.command_list = multinether.command_list;
 		this.world_list = new ArrayList<World>();
 		this.link_list = new ArrayList<String>();
 		this.portal_id_list = new ArrayList<Integer>();
 		this.portal_list = new ArrayList<Portal>();
-		this.portal_config = netherrep.getPortalConfig();
 		this.config_path_list = new ArrayList<String>();
+		this.netherlink_path = "NetherLinks.";
 		
-		if ( this.portal_id_list.isEmpty() )
+		if ( world_list.isEmpty() )
 		{
-			this.portal_id_list = getPortalIDs();
+			setWorldList();
 		}
 		
-		netherrep.getLogger().log(Level.INFO, "world_list: {0}", world_list.toString());
+		if ( portal_id_list.isEmpty() )
+		{
+			portal_id_list = getPortalIDs();
+		}
+		
+		multinether.getLogger().log(Level.INFO, "world_list: {0}", world_list.toString());
+		/*
 		for ( int i = 0; i < Bukkit.getWorld("World1").getLoadedChunks().length; i++ )
 		{
 			if ( Bukkit.getWorld("World1").getLoadedChunks()[i].getBlock(i, i, i).getType().equals(Material.PORTAL) );
 		}
+		*/
     }
     
     @Override
@@ -164,7 +171,7 @@ public class CmdExecutor implements CommandExecutor
 			{
 				if ( args[0].equalsIgnoreCase("add") )
 				{
-					netherrep.getLogger().log(Level.INFO, "exec add");
+					multinether.getLogger().log(Level.INFO, "exec add");
 					//TODO: prüfen ob Config bereits vorhanden; LinkList prüfen
 					//FIXME: Config-Werte in mehrere dynamische Paths schreiben anstatt in einen statischen
 					if ( args.length == 3 )
@@ -195,10 +202,10 @@ public class CmdExecutor implements CommandExecutor
 				}
 				else if ( args[0].equalsIgnoreCase("remove") )
 				{
-					netherrep.getLogger().log(Level.INFO, "exec netherlink remove");
+					multinether.getLogger().log(Level.INFO, "exec netherlink remove");
 					if ( args.length == 2 )
 					{
-						netherrep.getLogger().log(Level.INFO, "args.length == 2");
+						multinether.getLogger().log(Level.INFO, "args.length == 2");
 						boolean removed = removeLink(sender, args[1]);
 						if ( removed )
 						{
@@ -211,13 +218,13 @@ public class CmdExecutor implements CommandExecutor
 					}
 					else if ( args.length < 2 )
 					{
-						netherrep.getLogger().log(Level.INFO, "args.length < 2");
+						multinether.getLogger().log(Level.INFO, "args.length < 2");
 						sender.sendMessage("zu wenig Argumente!");
 						return false;
 					}
 					else if ( args.length > 2 )
 					{
-						netherrep.getLogger().log(Level.INFO, "args.length > 2");
+						multinether.getLogger().log(Level.INFO, "args.length > 2");
 						sender.sendMessage("zu viele Argumente!");
 						return false;
 					}
@@ -225,13 +232,13 @@ public class CmdExecutor implements CommandExecutor
 			}
 			else if ( args.length == 1 && args[0].equalsIgnoreCase("show") )
 			{
-				netherrep.getLogger().log(Level.INFO, "exec show");
+				multinether.getLogger().log(Level.INFO, "exec show");
 				//String links = netherrep.getConfig().getString("LinkList");
 				//links = links.replaceAll(":", " <> ");
 				//List<String> link_list = Arrays.asList(links.split(" "));
 				if ( this.link_list.isEmpty() )
 				{
-					netherrep.getLogger().log(Level.INFO, "link_list is empty");
+					multinether.getLogger().log(Level.INFO, "link_list is empty");
 					sender.sendMessage("keine Links gesetzt.");
 					return true;
 				}
@@ -243,7 +250,7 @@ public class CmdExecutor implements CommandExecutor
 			}
 			else if (args.length > 4)
 			{
-				netherrep.getLogger().log(Level.INFO, "args.length > 4");
+				multinether.getLogger().log(Level.INFO, "args.length > 4");
 				sender.sendMessage("zu viele Argumente!");
 				return false;
 			}
@@ -257,14 +264,17 @@ public class CmdExecutor implements CommandExecutor
 					try
 					{
 						Portal portal = createPortal(sender);
-						netherrep.getLogger().log(Level.INFO, "Portal erstellt:");
-						netherrep.getLogger().log(Level.INFO, "ID: {0}", portal.getID());
-						netherrep.getLogger().log(Level.INFO, "Location: {0}", portal.getLocation());
-						return true;
+						if ( !(portal == null) )
+						{
+							multinether.getLogger().log(Level.INFO, "Portal erstellt:");
+							multinether.getLogger().log(Level.INFO, "ID: {0}", portal.getID());
+							multinether.getLogger().log(Level.INFO, "Location: {0}", portal.getLocation());
+							return true;
+						}
 					}
 					catch( ClassCastException e )
 					{
-						netherrep.getLogger().log(Level.SEVERE, "Konnte Portal nicht erstellen, Fehler in createPortal() (ClassCastException)");
+						multinether.getLogger().log(Level.SEVERE, "Konnte Portal nicht erstellen, Fehler in createPortal() (ClassCastException)");
 						return false;
 					}
 				}
@@ -293,28 +303,11 @@ public class CmdExecutor implements CommandExecutor
 				}
 			}
 		}
-		else if ( cmd.getName().equals("functest") )
+		else if ( cmd.getName().equals("cmdtest") )
 		{
-			if ( sender instanceof Player )
-			{
-				Player p = (Player) sender;
-				Portal near_p = getNearPortal(p.getLocation());
-				if ( !(near_p == null) )
-				{
-					Integer id = near_p.getID();
-					int x = near_p.getX();
-					int y = near_p.getY();
-					int z = near_p.getZ();
-					sender.sendMessage("portal found: ");
-					sender.sendMessage("id:"+id+", x:"+x+", y:"+y+", z:"+z);
-				}
-				else
-				{
-					sender.sendMessage("no portal found");
-				}
-			}
+			return true;
 		}
-		netherrep.getLogger().log(Level.INFO, "anything else");
+		multinether.getLogger().log(Level.INFO, "anything else");
 		//sender.sendMessage("not yet implemented");
 		return false;
     }
@@ -378,11 +371,19 @@ public class CmdExecutor implements CommandExecutor
 				return false;
 			}
 			//TODO: Fehlerbehandlung für das Adden eines Links hinzufügen (Schwerpunkte: getConfig(), saveConfig())
-			netherrep.getConfig().addDefault(World1, World2);
-			netherrep.saveConfig();
+			//multinether.getConfig().addDefault(World1, World2);
+			multinether.getConfig().set(netherlink_path+World1, World2);
+			multinether.saveConfig();
 			//String link = World1+":"+World2;
 			//this.link_list.add(link);
 			setLinkList();
+			String links = "";
+			int t = link_list.size();
+			for ( int i = 0; i < link_list.size(); i++ )
+			{
+				links = links+", "+link_list.get(i);
+			}
+			sender.sendMessage("LinkList: "+t);
 			sender.sendMessage("Link gespeichert.");
 			return true;
 		}
@@ -411,8 +412,9 @@ public class CmdExecutor implements CommandExecutor
 				sender.sendMessage("Es existiert bereits ein Link für diese Welt!");
 				return false;
 			}
-			netherrep.getConfig().addDefault(player.getWorld().getName(), World2);
-			netherrep.saveConfig();
+			//multinether.getConfig().addDefault(player.getWorld().getName(), World2);
+			multinether.getConfig().set(netherlink_path+player.getWorld().getName(), World2);
+			multinether.saveConfig();
 			setLinkList();
 			sender.sendMessage("Link gespeichert.");
 			return true;
@@ -430,7 +432,7 @@ public class CmdExecutor implements CommandExecutor
     
     public boolean removeLink(CommandSender sender, String Link)
     {
-		netherrep.getLogger().log(Level.INFO, "exec removeLink()");
+		multinether.getLogger().log(Level.INFO, "exec removeLink()");
 		if ( !(linkExists(Link)) )
 		{
 			sender.sendMessage("Es existiert kein Link von "+Link);
@@ -438,30 +440,24 @@ public class CmdExecutor implements CommandExecutor
 		}
 		if ( isWorld(Link) )
 		{
-			netherrep.getLogger().log(Level.INFO, "isWorld(Link)");
-			for ( int i = 0; i < this.config_path_list.size(); i++ )
-			{
-				if ( config_path_list.get(i).equalsIgnoreCase(Link) )
-				{
-					netherrep.getConfig().set(Link, null);
-					netherrep.saveConfig();
-					setLinkList();
-					sender.sendMessage("Link entfernt.");
-					return true;
-				}
-			}
+			multinether.getLogger().log(Level.INFO, "isWorld(Link)");
+			multinether.getConfig().set(netherlink_path+Link, null);
+			multinether.saveConfig();
+			setLinkList();
+			sender.sendMessage("Link entfernt.");
+			return true;
 		}
 		else if ( !(isWorld(Link)) )
 		{
-			netherrep.getLogger().log(Level.INFO, "!(isWorld(Link))");
+			multinether.getLogger().log(Level.INFO, "!(isWorld(Link))");
 			for ( int i = 0; i < this.link_list.size(); i++ )
 			{
 				if ( this.link_list.get(i).equalsIgnoreCase(Link) )
 				{
 					//String path = this.link_list.get(i).split(":")[0];
 					String path = this.config_path_list.get(i);
-					netherrep.getConfig().set(path, null);
-					netherrep.saveConfig();
+					multinether.getConfig().set(path, null);
+					multinether.saveConfig();
 					setLinkList();
 					sender.sendMessage("Link entfernt.");
 					return true;
@@ -473,6 +469,19 @@ public class CmdExecutor implements CommandExecutor
 	
 	public boolean linkExists(String Link)
 	{
+		
+		multinether.reloadConfig();
+		try
+		{
+			Object val = multinether.getConfig().get(netherlink_path+Link);
+			return true;
+		}
+		catch ( NullPointerException npe )
+		{
+			return false;
+		}
+		
+		/*
 		for ( int i = 0; i < this.config_path_list.size(); i++ )
 		{
 			if ( config_path_list.get(i).equalsIgnoreCase(Link) )
@@ -481,6 +490,7 @@ public class CmdExecutor implements CommandExecutor
 			}
 		}
 		return false;
+		*/
 	}
     
     private void setWorldList()
@@ -491,15 +501,37 @@ public class CmdExecutor implements CommandExecutor
     private void setLinkList()
     {
 		setWorldList();
-		netherrep.reloadConfig();
+		multinether.reloadConfig();
+		link_list = new ArrayList<String>();
+		
+		/*
+		Object conf_val = getLinks();
+		
+		if ( conf_val instanceof MemorySection )
+		{
+			MemorySection m = (MemorySection) conf_val;
+			for ( int i = 0; i < world_list.size(); i++ )
+			{
+				try
+				{
+					Object link = m.get(netherlink_path+world_list.get(i).getName());
+					link_list.add(link.toString());
+				}
+				catch ( NullPointerException npe )
+				{
+					continue;
+				}
+			}
+		}
+		*/
 		this.link_list = new ArrayList<String>();
 		for ( int i = 0; i < this.world_list.size(); i++ )
 		{
 			try
 			{
-				if ( !(netherrep.getConfig().getString(this.world_list.get(i).getName()).equals("")) )
+				String link = multinether.getConfig().getString(this.world_list.get(i).getName());
+				if ( !(link == null) )
 				{
-					String link = netherrep.getConfig().getString(this.world_list.get(i).getName());
 					link = this.world_list.get(i).getName()+":"+link;
 					this.link_list.add(link);
 					this.config_path_list.add(this.world_list.get(i).getName());
@@ -507,11 +539,19 @@ public class CmdExecutor implements CommandExecutor
 			}
 			catch(NullPointerException e)
 			{
+				continue;
 				//netherrep.getLogger().log(Level.SEVERE, e.getMessage());
 				//e.printStackTrace();
 			}
 		}
     }
+	
+	public Object getLinks()
+	{
+		multinether.reloadConfig();
+		Object conf_val = multinether.getConfig().get(netherlink_path);
+		return conf_val;
+	}
 	
 	public String getLinkWorld(String current_world)
 	{
@@ -530,7 +570,6 @@ public class CmdExecutor implements CommandExecutor
 	/**
 	 * Erstellen eines neuen Portals.
 	 * @param sender Der Sender des Befehls.
-	 * @param world Die Link-Welt auf die das Portal führen soll.
 	 * @return Gibt das neuerstellte Portalobjekt zurück.
 	 * @throws ClassCastException - wenn der Sender kein Spieler ist (!(instanceof Player))
 	 */
@@ -544,7 +583,14 @@ public class CmdExecutor implements CommandExecutor
 			Location l = player.getLocation();
 			Location location = new Location(l.getWorld(), l.getX(), l.getY(), l.getZ());
 			Integer id;
-			id = this.portal_id_list.size();
+			if ( this.portal_id_list.isEmpty() )
+			{
+				id = 0;
+			}
+			else
+			{
+				id = this.portal_id_list.size();
+			}
 			
 			String linkworld = getLinkWorld(location.getWorld().getName());
 			if ( !(linkworld.isEmpty()) )
@@ -568,6 +614,10 @@ public class CmdExecutor implements CommandExecutor
 				{
 					sender.sendMessage("Portal erstellt und gespeichert.");
 				}
+			}
+			else
+			{
+				sender.sendMessage("Kein Link vorhanden.");
 			}
 		}
 		else if ( !(sender instanceof Player) )
@@ -629,7 +679,7 @@ public class CmdExecutor implements CommandExecutor
 			String link = p.getLinkTo();
 			
 			//netherrep.getPortalConfig().addDefault(""+id, "");
-			ConfigurationSection new_portal_section = netherrep.getPortalConfig().createSection(""+id);
+			ConfigurationSection new_portal_section = multinether.getPortalConfig().createSection(""+id);
 			ConfigurationSection portal_location = new_portal_section.createSection("location");
 			portal_location.set("world", world);
 			portal_location.set("x", x);
@@ -642,7 +692,7 @@ public class CmdExecutor implements CommandExecutor
 			this.portal_list.add(p);
 			//FIXME: PortalConfig wird nicht gespeichert!
 			//netherrep.getPortalConfig().addDefaults(portal);
-			netherrep.savePortalConfig();
+			multinether.savePortalConfig();
 			return true;
 		}
 		return false;
@@ -652,8 +702,8 @@ public class CmdExecutor implements CommandExecutor
 	{
 		if ( this.portal_id_list.contains(id) )
 		{
-			netherrep.getPortalConfig().set(""+id, null);
-			netherrep.savePortalConfig();
+			multinether.getPortalConfig().set(""+id, null);
+			multinether.savePortalConfig();
 			this.portal_id_list.remove(id);
 			Portal p = getPortal(id);
 			this.portal_list.remove(p);
@@ -665,7 +715,6 @@ public class CmdExecutor implements CommandExecutor
 	public Portal getNearPortal(Location l)
 	{
 		//TODO: Portale in der Nähe der Spieler-Location suchen (Suche nach Material.PORTAL)
-		//Portal nearest_portal = new Portal();
 		Portal near_portal = null;
 		List<Block> portal_blocks_in_range = new ArrayList<Block>();
 		
@@ -753,7 +802,7 @@ public class CmdExecutor implements CommandExecutor
 		List<Integer> portal_ids = new ArrayList<Integer>();
 		if ( this.portal_id_list.isEmpty() )
 		{
-			FileConfiguration portal_conf = netherrep.getPortalConfig();
+			FileConfiguration portal_conf = multinether.getPortalConfig();
 			Set<String> keys = portal_conf.getKeys(true);
 			for ( int i = 0; i < keys.size(); i++ )
 			{
@@ -763,7 +812,7 @@ public class CmdExecutor implements CommandExecutor
 				{
 					Integer current_id = Integer.parseInt(key_list[i].toString());
 					portal_ids.add(current_id);
-					netherrep.getLogger().log(Level.INFO, "{0}", current_id);
+					multinether.getLogger().log(Level.INFO, "{0}", current_id);
 				}
 				catch ( ClassCastException cce )
 				{
@@ -783,18 +832,18 @@ public class CmdExecutor implements CommandExecutor
 	{
 		List<Portal> portals = new ArrayList<Portal>();
 		List<Integer> ids;
-		if ( this.portal_id_list.isEmpty() )
+		if ( portal_id_list.isEmpty() )
 		{
 			ids = getPortalIDs();
 		}
 		else
 		{
-			ids = this.portal_id_list;
+			ids = portal_id_list;
 		}
-		for ( int i = 0; i < this.portal_id_list.size(); i++ )
+		for ( int i = 0; i < portal_id_list.size(); i++ )
 		{
-			Integer current_id = this.portal_id_list.get(i);
-			ConfigurationSection portal_section = netherrep.getPortalConfig().getConfigurationSection(current_id.toString());
+			Integer current_id = portal_id_list.get(i);
+			ConfigurationSection portal_section = multinether.getPortalConfig().getConfigurationSection(current_id.toString());
 			ConfigurationSection location_section = portal_section.getConfigurationSection("location");
 			Integer p_x = portal_section.getInt("x");
 			Integer p_y = portal_section.getInt("y");
@@ -811,6 +860,5 @@ public class CmdExecutor implements CommandExecutor
 			portals.add(current_portal);
 		}
 		return portals;
-	}
-	
+	}	
 }

@@ -1,7 +1,7 @@
 name: MultiNether
 main: com.ymail.MetalsKiller64.MultiNether
 version: 0.5
-description: 
+description: MultiNether Test
 commands:
   rtp:
     description: Teleportation
@@ -19,5 +19,5 @@ commands:
   cmdtest:
     description: Test-Command
     usage: /<command>
-    permission: MultiNether.functest
+    permission: MultiNether.cmdtest
     permission-message: Keine Berechtigung!
