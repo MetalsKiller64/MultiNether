@@ -35,6 +35,7 @@ public final class MultiNether extends JavaPlugin
 		savePortalConfig();
 		getConfig().options().copyDefaults(true); //FIXME: Defaults überschreiben??
 		getConfig().set("LinkWorlds", true);
+		getConfig().set("PortalCount", 0);
 		saveConfig();
 		//TODO: Befehl zum automatischen Erstellen eines Nethers zur angegebenen Welt mit passendem Seed
 		//TODO: Nether-Portale; zu jedem Portal auf der Oberwelt ein Portal im zugehörigen Nether generieren; in Verbindung mit Config
