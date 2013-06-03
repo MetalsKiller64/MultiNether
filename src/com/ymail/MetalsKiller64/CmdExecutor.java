@@ -17,9 +17,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Material;
+import org.bukkit.World.Environment;
+import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.generator.ChunkGenerator;
 //import java.util.logging.Level;
 //import org.bukkit.plugin.Plugin;
 
@@ -308,6 +312,8 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else if ( cmd.getName().equals("cmdtest") )
 		{
+			generateNether("Welt3");
+			/*
 			if ( sender instanceof Player )
 			{
 				Player player = (Player) sender;
@@ -326,7 +332,6 @@ public class CmdExecutor implements CommandExecutor
 				{
 					sender.sendMessage("No near portals found...");
 				}
-				
 				/*
 				Portal p = getNearActivePortal(player.getLocation(), sender);
 				
@@ -341,8 +346,9 @@ public class CmdExecutor implements CommandExecutor
 				{
 					sender.sendMessage("no portal found");
 				}
-				*/
+				* /
 			}
+			*/
 			return true;
 		}
 		multinether.getLogger().log(Level.INFO, "anything else");
@@ -905,38 +911,6 @@ public class CmdExecutor implements CommandExecutor
 			for ( int h = 0; h < allPortals.size(); h++ )
 			{
 				Portal current_portal = allPortals.get(h);
-				try
-				{
-					multinether.getLogger().log(Level.INFO, ""+current_portal.getWorld());
-				}
-				catch ( NullPointerException npe )
-				{
-					multinether.getLogger().log(Level.INFO, "world is null");
-				}
-				try
-				{
-					multinether.getLogger().log(Level.INFO, ""+current_portal.getX());
-				}
-				catch ( NullPointerException npe )
-				{
-					multinether.getLogger().log(Level.INFO, "x is null");
-				}
-				try
-				{
-					multinether.getLogger().log(Level.INFO, " "+current_portal.getY());
-				}
-				catch ( NullPointerException npe )
-				{
-					multinether.getLogger().log(Level.INFO, "y is null");
-				}
-				try
-				{
-					multinether.getLogger().log(Level.INFO, " "+current_portal.getZ());
-				}
-				catch ( NullPointerException npe )
-				{
-					multinether.getLogger().log(Level.INFO, "z is null");
-				}
 				Location current_portal_location = new Location(Bukkit.getWorld(current_portal.getWorld()), current_portal.getX(), current_portal.getY(), current_portal.getZ());
 				portal_locations.add(current_portal_location);
 				//multinether.getLogger().log(Level.INFO, ""+current_portal_location);
@@ -1102,5 +1076,18 @@ public class CmdExecutor implements CommandExecutor
 		return portals;
 	}
 	
+	
+	public void generateNether(String worldname)
+	{
+		Long seed = Bukkit.getWorld(worldname).getSeed();
+		World w = Bukkit.getWorld(worldname);
+		WorldCreator create_nether = new WorldCreator(worldname+"_nether");
+		create_nether.type(WorldType.NORMAL);
+		create_nether.environment(Environment.NETHER);
+		create_nether.seed(seed);
+		create_nether.generateStructures(true);
+		create_nether.generator(w.getGenerator());
+		Bukkit.getWorlds().add(create_nether.createWorld());
+	}
 	
 }
