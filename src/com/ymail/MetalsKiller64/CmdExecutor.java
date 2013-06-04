@@ -31,11 +31,11 @@ public class CmdExecutor implements CommandExecutor
 {
     private MultiNether multinether;
     private List<String> command_list;
-    private List<World> world_list;
+    //private List<World> world_list;
     private List<String> link_list;
     private List<String> config_path_list;
-	private List<Integer> portal_id_list;
-	private List<Portal> portal_list;
+	//private List<Integer> portal_id_list;
+	//private List<Portal> portal_list;
 	private String netherlink_path;
 	private String portalcount_path;
     
@@ -43,25 +43,28 @@ public class CmdExecutor implements CommandExecutor
     {
 		this.multinether = plugin;
 		this.command_list = multinether.command_list;
-		this.world_list = new ArrayList<World>();
+		//this.world_list = new ArrayList<World>();
 		this.link_list = new ArrayList<String>();
-		this.portal_id_list = new ArrayList<Integer>();
-		this.portal_list = new ArrayList<Portal>();
+		//this.portal_id_list = new ArrayList<Integer>();
+		//this.portal_list = new ArrayList<Portal>();
 		this.config_path_list = new ArrayList<String>();
 		this.netherlink_path = "NetherLinks.";
 		this.portalcount_path = "PortalCount";
 		
+		/*
 		if ( world_list.isEmpty() )
 		{
 			setWorldList();
 		}
-		
+		*/
+		/*
 		if ( portal_id_list.isEmpty() )
 		{
 			portal_id_list = getPortalIDs();
 		}
+		*/
 		
-		multinether.getLogger().log(Level.INFO, "world_list: {0}", world_list.toString());
+		multinether.getLogger().log(Level.INFO, "world_list: {0}", Bukkit.getWorlds().toString());
 		/*
 		for ( int i = 0; i < Bukkit.getWorld("World1").getLoadedChunks().length; i++ )
 		{
@@ -73,7 +76,7 @@ public class CmdExecutor implements CommandExecutor
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
     {
-		setWorldList();
+		//setWorldList();
 		setLinkList();
 		if ( cmd.getName().equalsIgnoreCase("rtp") )
 		{
@@ -312,7 +315,11 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else if ( cmd.getName().equals("cmdtest") )
 		{
-			generateNether("Welt3");
+			for ( int i = 0; i < getPortalIDs().size(); i++ )
+			{
+				sender.sendMessage(getPortalIDs().get(i).toString());
+			}
+			//generateNether("Welt3");
 			/*
 			if ( sender instanceof Player )
 			{
@@ -381,10 +388,10 @@ public class CmdExecutor implements CommandExecutor
     public boolean isWorld(String value)
     {
 		//List<World> world_list = Bukkit.getWorlds();
-		for (int i = 0; i < this.world_list.size(); i++)
+		for (int i = 0; i < Bukkit.getWorlds().size(); i++)
 		{
 			//netherrep.getLogger().log(Level.INFO, "{0}.equalsIgnoreCase({1})", new Object[]{value, this.world_list.get(i).getName()});
-			if ( value.equalsIgnoreCase(this.world_list.get(i).getName()) )
+			if ( value.equalsIgnoreCase(Bukkit.getWorlds().get(i).getName()) )
 			{
 			return true;
 			}
@@ -542,14 +549,16 @@ public class CmdExecutor implements CommandExecutor
 		return false;
 	}
     
+	/*
     private void setWorldList()
     {
 		this.world_list = Bukkit.getWorlds();
     }
+	*/
     
     private void setLinkList()
     {
-		setWorldList();
+		//setWorldList();
 		multinether.reloadConfig();
 		link_list = new ArrayList<String>();
 		
@@ -574,16 +583,16 @@ public class CmdExecutor implements CommandExecutor
 		}
 		*/
 		this.link_list = new ArrayList<String>();
-		for ( int i = 0; i < this.world_list.size(); i++ )
+		for ( int i = 0; i < Bukkit.getWorlds().size(); i++ )
 		{
 			try
 			{
-				String link = multinether.getConfig().getString(this.world_list.get(i).getName());
+				String link = multinether.getConfig().getString(Bukkit.getWorlds().get(i).getName());
 				if ( !(link == null) )
 				{
-					link = this.world_list.get(i).getName()+":"+link;
+					link = Bukkit.getWorlds().get(i).getName()+":"+link;
 					this.link_list.add(link);
-					this.config_path_list.add(this.world_list.get(i).getName());
+					this.config_path_list.add(Bukkit.getWorlds().get(i).getName());
 				}
 			}
 			catch(NullPointerException e)
@@ -598,14 +607,14 @@ public class CmdExecutor implements CommandExecutor
 	public List<String> getLinks()
 	{
 		List<String> links = new ArrayList<String>();
-		setWorldList();
+		//setWorldList();
 		multinether.reloadConfig();
-		for ( int i = 0; i < world_list.size(); i++ )
+		for ( int i = 0; i < Bukkit.getWorlds().size(); i++ )
 		{
 			try
 			{
-				String link = multinether.getConfig().get(netherlink_path+world_list.get(i).getName()).toString();
-				links.add(world_list.get(i).getName());
+				String link = multinether.getConfig().get(netherlink_path+Bukkit.getWorlds().get(i).getName()).toString();
+				links.add(Bukkit.getWorlds().get(i).getName());
 			}
 			catch ( NullPointerException npe )
 			{
@@ -617,7 +626,7 @@ public class CmdExecutor implements CommandExecutor
 	
 	public String getLinkWorld(String current_world)
 	{
-		setWorldList();
+		//setWorldList();
 		String world = "";
 		try
 		{
@@ -655,15 +664,24 @@ public class CmdExecutor implements CommandExecutor
 			Player player = (Player) sender;
 			Location l = player.getLocation();
 			Location location = new Location(l.getWorld(), l.getX(), l.getY(), l.getZ());
-			sender.sendMessage(""+getPortalIDs().size());
-			Integer id;
-			if ( getPortalIDs().isEmpty() )
+			//TODO: Portal-Rahmen
+			//sender.sendMessage(""+getPortalIDs().size());
+			Integer id = 0;
+			if ( !(getPortalIDs().isEmpty()) )
 			{
-				id = 0;
-			}
-			else
-			{
-				id = getPortalIDs().size();
+				for ( int i = 0; i < getPortalIDs().size(); i++ )
+				{
+					//sender.sendMessage(getPortalIDs().get(i).toString());
+					if ( !(getPortalIDs().contains(i)) )
+					{
+						id = i;
+						//sender.sendMessage("id = "+i);
+					}
+				}
+				if ( id == 0 )
+				{
+					id = getPortalIDs().size();
+				}
 			}
 			
 			String linkworld = getLinkWorld(location.getWorld().getName());
@@ -704,14 +722,14 @@ public class CmdExecutor implements CommandExecutor
 	
 	private Portal getPortal(Integer id)
 	{
-		Portal p = new Portal();
-		if ( !(this.portal_list.isEmpty()) )
+		Portal p = null;
+		if ( !(getAllPortals().isEmpty()) )
 		{
-			for ( int i = 0; i < this.portal_list.size(); i++ )
+			for ( int i = 0; i < getAllPortals().size(); i++ )
 			{
-				if ( this.portal_list.get(i).getID().equals(id) )
+				if ( getAllPortals().get(i).getID().equals(id) )
 				{
-					p = this.portal_list.get(i);
+					p = getAllPortals().get(i);
 				}
 			}
 		}
@@ -722,9 +740,9 @@ public class CmdExecutor implements CommandExecutor
 	{
 		//TODO: Fehlerbehandlung hinzufügen
 		Integer portal_id = null;
-		for ( int i = 0; i < this.portal_list.size(); i++ )
+		for ( int i = 0; i < getAllPortals().size(); i++ )
 		{
-			Portal current_portal = this.portal_list.get(i);
+			Portal current_portal = getAllPortals().get(i);
 			if ( current_portal.getLocation().getX() == l.getX() && current_portal.getLocation().getY() == l.getY() && current_portal.getLocation().getZ() == l.getZ() )
 			{
 				portal_id = current_portal.getID();
@@ -763,8 +781,8 @@ public class CmdExecutor implements CommandExecutor
 			//new_plugin_section.addDefault("location",l);
 			//new_plugin_section.addDefault("linkto", link);
 			new_portal_section.set("linkto", link);
-			this.portal_id_list.add(p.getID());
-			this.portal_list.add(p);
+			//this.portal_id_list.add(p.getID());
+			//this.portal_list.add(p);
 			//FIXME: PortalConfig wird nicht gespeichert!
 			//netherrep.getPortalConfig().addDefaults(portal);
 			multinether.savePortalConfig();
@@ -786,13 +804,14 @@ public class CmdExecutor implements CommandExecutor
 	
 	public boolean removePortal(Integer id)
 	{
-		if ( this.portal_id_list.contains(id) )
+		//TODO: von Listen auf Funktionsaufrufe umbauen
+		if ( getPortalIDs().contains(id) )
 		{
 			multinether.getPortalConfig().set(""+id, null);
 			multinether.savePortalConfig();
-			this.portal_id_list.remove(id);
+			//this.portal_id_list.remove(id);
 			Portal p = getPortal(id);
-			this.portal_list.remove(p);
+			//this.portal_list.remove(p);
 			return true;
 		}
 		return false;
@@ -1076,7 +1095,6 @@ public class CmdExecutor implements CommandExecutor
 		return portals;
 	}
 	
-	
 	public void generateNether(String worldname)
 	{
 		Long seed = Bukkit.getWorld(worldname).getSeed();
@@ -1089,5 +1107,4 @@ public class CmdExecutor implements CommandExecutor
 		create_nether.generator(w.getGenerator());
 		Bukkit.getWorlds().add(create_nether.createWorld());
 	}
-	
 }
