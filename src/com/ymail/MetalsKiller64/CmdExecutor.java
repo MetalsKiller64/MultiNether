@@ -315,12 +315,6 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else if ( cmd.getName().equals("cmdtest") )
 		{
-			List<Portal> portals = getAllPortals();
-			for ( Portal p : portals )
-			{
-				//sender.sendMessage(""+i);
-				sender.sendMessage(p.getID().toString());
-			}
 			//generateNether("Welt3");
 			/*
 			if ( sender instanceof Player )
@@ -660,6 +654,7 @@ public class CmdExecutor implements CommandExecutor
 	 */
 	public Portal createPortal(CommandSender sender)
 	{
+		multinether.getLogger().log(Level.INFO, ">>> createPortal <<<");
 		Portal p = null;
 		if ( sender instanceof Player )
 		{
@@ -671,14 +666,17 @@ public class CmdExecutor implements CommandExecutor
 			Integer id = 0;
 			if ( !(getPortalIDs().isEmpty()) )
 			{
-				for ( int i = 0; i < getPortalIDs().size(); i++ )
+				List<Integer> ids = getPortalIDs();
+				for ( int i = 0; i < ids.size(); i++ )
 				{
-					//sender.sendMessage(getPortalIDs().get(i).toString());
+					sender.sendMessage(ids.get(i).toString());
 					if ( !(getPortalIDs().contains(i)) )
 					{
+						//sender.sendMessage(""+i);
 						Portal check_p = getPortal(i);
-						if ( check_p != null )
+						if ( check_p == null )
 						{
+							sender.sendMessage("take this id: "+id);
 							id = i;
 						}
 						//sender.sendMessage("id = "+i);
@@ -686,9 +684,11 @@ public class CmdExecutor implements CommandExecutor
 				}
 				if ( id == 0 )
 				{
+					sender.sendMessage("take getPortalIDs().size()");
 					id = getPortalIDs().size();
 				}
 			}
+			sender.sendMessage("id = "+id);
 			
 			String linkworld = getLinkWorld(location.getWorld().getName());
 			if ( !(linkworld.isEmpty()) )
@@ -726,44 +726,9 @@ public class CmdExecutor implements CommandExecutor
 		return p;
 	}
 	
-	private Portal getPortal(Integer id)
-	{
-		Portal p = null;
-		multinether.getLogger().log(Level.INFO, ">>> getPortal <<<");
-		multinether.getLogger().log(Level.INFO, getAllPortals().toString());
-		if ( !(getAllPortals().isEmpty()) )
-		{
-			for ( int i = 0; i < getAllPortals().size(); i++ )
-			{
-				multinether.getLogger().log(Level.INFO, getAllPortals().get(i).toString());
-				multinether.getLogger().log(Level.INFO, getAllPortals().get(i).getID().toString());
-				if ( getAllPortals().get(i).getID().equals(id) )
-				{
-					p = getAllPortals().get(i);
-					multinether.getLogger().log(Level.INFO, p.toString());
-				}
-			}
-		}
-		return p;
-	}
-	
-	public Integer getPortalId(Location l)
-	{
-		//TODO: Fehlerbehandlung hinzufügen
-		Integer portal_id = null;
-		for ( int i = 0; i < getAllPortals().size(); i++ )
-		{
-			Portal current_portal = getAllPortals().get(i);
-			if ( current_portal.getLocation().getX() == l.getX() && current_portal.getLocation().getY() == l.getY() && current_portal.getLocation().getZ() == l.getZ() )
-			{
-				portal_id = current_portal.getID();
-			}
-		}
-		return portal_id;
-	}
-	
 	public boolean savePortal(Portal p)
 	{
+		multinether.getLogger().log(Level.INFO, ">>> savePortal <<<");
 		if ( !( getPortalIDs().contains(p.getID()) ) )
 		{
 			//Map<String, Object> portal = new HashMap<String, Object>();
@@ -828,6 +793,43 @@ public class CmdExecutor implements CommandExecutor
 			return true;
 		}
 		return false;
+	}
+	
+	private Portal getPortal(Integer id)
+	{
+		multinether.getLogger().log(Level.INFO, ">>> getPortal <<<");
+		Portal p = null;
+		multinether.getLogger().log(Level.INFO, getAllPortals().toString());
+		if ( !(getAllPortals().isEmpty()) )
+		{
+			for ( int i = 0; i < getAllPortals().size(); i++ )
+			{
+				multinether.getLogger().log(Level.INFO, getAllPortals().get(i).toString());
+				multinether.getLogger().log(Level.INFO, getAllPortals().get(i).getID().toString());
+				if ( getAllPortals().get(i).getID().equals(id) )
+				{
+					p = getAllPortals().get(i);
+					multinether.getLogger().log(Level.INFO, p.toString());
+				}
+			}
+		}
+		return p;
+	}
+	
+	public Integer getPortalId(Location l)
+	{
+		multinether.getLogger().log(Level.INFO, ">>> getPortalId <<<");
+		//TODO: Fehlerbehandlung hinzufügen
+		Integer portal_id = null;
+		for ( int i = 0; i < getAllPortals().size(); i++ )
+		{
+			Portal current_portal = getAllPortals().get(i);
+			if ( current_portal.getLocation().getX() == l.getX() && current_portal.getLocation().getY() == l.getY() && current_portal.getLocation().getZ() == l.getZ() )
+			{
+				portal_id = current_portal.getID();
+			}
+		}
+		return portal_id;
 	}
 	
 	public Portal getNearActivePortal(Location l, CommandSender sender)
@@ -1048,23 +1050,24 @@ public class CmdExecutor implements CommandExecutor
 	 */
 	private List<Integer> getPortalIDs()
 	{
+		multinether.getLogger().log(Level.INFO, ">>> getPortalIDs <<<");
 		List<Integer> portal_ids = new ArrayList<Integer>();
 		multinether.reloadConfig();
 		FileConfiguration portal_conf = multinether.getPortalConfig();
 		Set<String> keys = portal_conf.getKeys(true);
+		Object[] key_list = keys.toArray();
 		int portalcount = multinether.getConfig().getInt(portalcount_path);
-		for ( int i = 0; i < keys.size(); i++ )
+		for ( int i = 0; i < key_list.length; i++ )
 		{
 			//multinether.getLogger().log(Level.INFO, "i = "+i);
 			//multinether.getLogger().log(Level.INFO, "Key{0}: {1}", new Object[]{i, key_list[i]});
-			Object[] key_list = keys.toArray();
 			//if ( key_list[i].toString().length() == 1 )
 			//{
 			try
 			{
 				Integer current_id = Integer.parseInt(key_list[i].toString());
 				portal_ids.add(current_id);
-				multinether.getLogger().log(Level.INFO, "added id: {0}", current_id);
+				//multinether.getLogger().log(Level.INFO, "added id: {0}", current_id);
 			}
 			catch ( ClassCastException cce )
 			{
@@ -1082,6 +1085,7 @@ public class CmdExecutor implements CommandExecutor
 	
 	public List<Portal> getAllPortals()
 	{
+		multinether.getLogger().log(Level.INFO, ">>> getAllPortals <<<");
 		multinether.reloadConfig();
 		List<Portal> portals = new ArrayList<Portal>();
 		List<Integer> ids = getPortalIDs();
@@ -1121,13 +1125,15 @@ public class CmdExecutor implements CommandExecutor
 		Bukkit.getWorlds().add(create_nether.createWorld());
 	}
 	
-	public void openPortal(Portal p)
+	public void openPortal(Portal p, Player player)
 	{
 		int x = p.getX();
 		int y = p.getY();
 		int z = p.getZ();
 		String world = p.getWorld();
 		Location pl = new Location(Bukkit.getWorld(world), x, y, z);
+		Location r1 = new Location(Bukkit.getWorld(world), (x-1), y, z);
+		
 		Block pb = pl.getBlock();
 		if ( pb.getType().equals(Material.AIR) )
 		{
