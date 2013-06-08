@@ -320,7 +320,7 @@ public class CmdExecutor implements CommandExecutor
 			Location p_loc = pl.getLocation();
 			Portal portal = getNearestPortal(p_loc);
 			sender.sendMessage("found Portal: "+portal.getID());
-			//openPortal(p, pl);
+			openPortal(portal, pl);
 			//generateNether("Welt3");
 			/*
 			if ( sender instanceof Player )
@@ -1002,7 +1002,7 @@ public class CmdExecutor implements CommandExecutor
 					//multinether.getLogger().log(Level.INFO, "block loc: "+current_block_loc);
 					//multinether.getLogger().log(Level.INFO, "x = "+x+" y = "+y+" z = "+z);
 					//multinether.getLogger().log(Level.INFO, "broken x = "+current_block.getX());
-					multinether.getLogger().log(Level.INFO, current_block.getX()+" "+current_block.getY()+" "+current_block.getZ());
+					//multinether.getLogger().log(Level.INFO, current_block.getX()+" "+current_block.getY()+" "+current_block.getZ());
 					//TODO: portal-positionen durchsuchen; prüfen ob eine position mit aktueller block-position übereinstimmt
 					for ( int i = 0; i < portal_locations.size(); i++ )
 					{
@@ -1085,6 +1085,7 @@ public class CmdExecutor implements CommandExecutor
 			int final_x = 0;
 			int final_y = 0;
 			int final_z = 0;
+			
 			for ( int j = 0; j < portal_locations.size(); j++ )
 			{
 				Location c_loc = portal_locations.get(j);
@@ -1094,186 +1095,10 @@ public class CmdExecutor implements CommandExecutor
 				int x_diff = 0;
 				int y_diff = 0;
 				int z_diff = 0;
-				boolean negate_x = false;
-				boolean negate_y = false;
-				boolean negate_z = false;
 				
-				//x
-				if ( x < 0 && l_x < 0 )
-				{
-					multinether.getLogger().log(Level.INFO, "both x negative");
-					multinether.getLogger().log(Level.INFO, "x = "+x);
-					multinether.getLogger().log(Level.INFO, "l_x = "+l_x);
-
-					x *= -1;
-					l_x *= -1;
-					negate_x = true;
-					multinether.getLogger().log(Level.INFO, "x = "+x);
-					multinether.getLogger().log(Level.INFO, "l_x = "+l_x);
-					if ( x < l_x )
-					{
-						x_diff = l_x - x;
-					}
-					else
-					{
-						x_diff = x - l_x;
-					}
-				}
-				else if ( l_x > 0 && x > 0 )
-				{
-					multinether.getLogger().log(Level.INFO, "both x positive");
-					if ( l_x > x )
-					{
-						x_diff = l_x - x;
-					}
-					else
-					{
-						x_diff = x - l_x;
-					}
-				}
-				else
-				{
-					multinether.getLogger().log(Level.INFO, "x - one on one");
-					if ( l_x < 0 && x > 0 )
-					{
-						l_x *= -1;
-						if ( l_x < x )
-						{
-							x_diff = x - l_x;
-						}
-						else
-						{
-							x_diff = l_x - x;
-						}
-					}
-					else
-					{
-						x *= -1;
-						negate_x = true;
-						if ( x < l_x )
-						{
-							x_diff = l_x - x;
-						}
-						else
-						{
-							x_diff = x - l_x;
-						}
-					}
-				}
-				//y
-				if ( l_y < 0 && y < 0 )
-				{
-					multinether.getLogger().log(Level.INFO, "both y negative");
-					negate_y = true;
-					l_y *= -1;
-					y *= -1;
-					if ( l_y < y )
-					{
-						y_diff = y - l_y;
-					}
-					else
-					{
-						y_diff = l_y - y;
-					}
-				}
-				else if ( l_y > 0 && y > 0 )
-				{
-					multinether.getLogger().log(Level.INFO, "both y positive");
-					if ( l_y > y )
-					{
-						y_diff = l_y - y;
-					}
-					else
-					{
-						y_diff = y - l_y;
-					}
-				}
-				else
-				{
-					multinether.getLogger().log(Level.INFO, "y - one on one");
-					if ( l_y < 0 && y > 0 )
-					{
-						l_y *= -1;
-						if ( l_y < y )
-						{
-							y_diff = y - l_y;
-						}
-						else
-						{
-							y_diff = l_y - y;
-						}
-					}
-					else
-					{
-						negate_y = true;
-						y *= -1;
-						if ( y < l_y )
-						{
-							y_diff = l_y - y;
-						}
-						else
-						{
-							y_diff = y - l_y;
-						}
-					}
-				}
-				//z
-				if ( l_z < 0 && z < 0 )
-				{
-					multinether.getLogger().log(Level.INFO, "both z negative");
-					z *= -1;
-					l_z *= -1;
-					negate_z = true;
-					if ( l_z < z )
-					{
-						z_diff = z - l_z;
-					}
-					else
-					{
-						z_diff = l_z - z;
-					}
-				}
-				else if ( l_z > 0 && z > 0 )
-				{
-					multinether.getLogger().log(Level.INFO, "both z negative");
-					if ( l_z > z )
-					{
-						z_diff = l_z - z;
-					}
-					else
-					{
-						z_diff = z - l_z;
-					}
-				}
-				else
-				{
-					multinether.getLogger().log(Level.INFO, "z - one on one");
-					if ( l_z < 0 && z > 0 )
-					{
-						l_z *= -1;
-						if ( l_z < z )
-						{
-							z_diff = z - l_z;
-						}
-						else
-						{
-							z_diff = l_z - z;
-						}
-					}
-					else
-					{
-						z *= -1;
-						negate_z = true;
-						if ( z < l_z )
-						{
-							z_diff = l_z - z;
-						}
-						else
-						{
-							z_diff = z - l_z;
-						}
-					}
-				}
+				x_diff = getDiff(x, l_x);
+				y_diff = getDiff(y, l_y);
+				z_diff = getDiff(z, l_z);
 				
 				if ( j != portal_locations.size()-1 )
 				{
@@ -1286,172 +1111,9 @@ public class CmdExecutor implements CommandExecutor
 					int next_y_diff = 0;
 					int next_z_diff = 0;
 					
-					boolean negate_next_x = false;
-					boolean negate_next_y = false;
-					boolean negate_next_z = false;
-					
-					//x
-					if ( next_x < 0 && l_x < 0 )
-					{
-						x *= -1;
-						l_x *= -1;
-						negate_next_x = true;
-						if ( next_x < l_x )
-						{
-							next_x_diff = l_x - next_x;
-						}
-						else
-						{
-							next_x_diff = next_x - l_x;
-						}
-					}
-					else if ( next_x > 0 && l_x > 0 )
-					{
-						if ( next_x > l_x )
-						{
-							next_x_diff = next_x - l_x;
-						}
-						else
-						{
-							next_x_diff = l_x - next_x;
-						}
-					}
-					else
-					{
-						if ( next_x < 0 && l_x > 0 )
-						{
-							next_x *= -1;
-							negate_next_x = true;
-							if ( next_x < l_x )
-							{
-								next_x_diff = l_x - next_x;
-							}
-							else
-							{
-								next_x_diff = next_x - l_x;
-							}
-						}
-						else
-						{
-							l_x *= -1;
-							if ( l_x < next_x )
-							{
-								next_x_diff = next_x - l_x;
-							}
-							else
-							{
-								next_x_diff = l_x - next_x;
-							}
-						}
-					}
-					//y
-					if ( next_y < 0 && l_y < 0 )
-					{
-						y *= -1;
-						l_y *= -1;
-						negate_next_y = true;
-						if ( next_y < l_y )
-						{
-							next_y_diff = l_y - next_y;
-						}
-						else
-						{
-							next_y_diff = next_y - l_y;
-						}
-					}
-					else if ( next_y > 0 && l_y > 0 )
-					{
-						if ( next_y > l_y )
-						{
-							next_y_diff = next_y - l_y;
-						}
-						else
-						{
-							next_y_diff = l_y - next_y;
-						}
-					}
-					else
-					{
-						if ( next_y < 0 && l_y > 0 )
-						{
-							next_y *= -1;
-							negate_next_y = true;
-							if ( next_y < l_y )
-							{
-								next_y_diff = l_y - next_y;
-							}
-							else
-							{
-								next_y_diff = next_y - l_y;
-							}
-						}
-						else
-						{
-							l_y *= -1;
-							if ( l_y < next_y )
-							{
-								next_y_diff = next_y - l_y;
-							}
-							else
-							{
-								next_y_diff = l_y - next_y;
-							}
-						}
-					}
-					//z
-					if ( next_z < 0 && l_z < 0 )
-					{
-						z *= -1;
-						l_z *= -1;
-						negate_next_z = true;
-						if ( next_z < l_z )
-						{
-							next_z_diff = l_z - next_z;
-						}
-						else
-						{
-							next_z_diff = next_z - l_z;
-						}
-					}
-					else if ( next_z > 0 && l_z > 0 )
-					{
-						if ( next_z > l_z )
-						{
-							next_z_diff = next_z - l_z;
-						}
-						else
-						{
-							next_z_diff = l_z - next_z;
-						}
-					}
-					else
-					{
-						if ( next_z < 0 && l_z > 0 )
-						{
-							next_z *= -1;
-							negate_next_z = true;
-							if ( next_z < l_z )
-							{
-								next_z_diff = l_z - next_z;
-							}
-							else
-							{
-								next_z_diff = next_z - l_z;
-							}
-						}
-						else
-						{
-							l_z *= -1;
-							if ( l_z < next_z )
-							{
-								next_z_diff = next_z - l_z;
-							}
-							else
-							{
-								next_z_diff = l_z - next_z;
-							}
-						}
-					}
+					next_x_diff = getDiff(next_x, l_x);
+					next_y_diff = getDiff(next_y, l_y);
+					next_z_diff = getDiff(next_z, l_z);
 					
 					multinether.getLogger().log(Level.INFO, "x_diff = "+x_diff);
 					multinether.getLogger().log(Level.INFO, "y_diff = "+y_diff);
@@ -1459,22 +1121,23 @@ public class CmdExecutor implements CommandExecutor
 					
 					multinether.getLogger().log(Level.INFO, "next_x_diff = "+next_x_diff);
 					multinether.getLogger().log(Level.INFO, "next_y_diff = "+next_y_diff);
-					multinether.getLogger().log(Level.INFO, "nest_z_diff = "+next_z_diff);
+					multinether.getLogger().log(Level.INFO, "next_z_diff = "+next_z_diff);
 					
 					if ( next_x_diff <= x_diff && next_y_diff <= y_diff && next_z_diff <= z_diff )
 					{
 						final_x = next_x;
 						final_y = next_y;
 						final_z = next_z;
-						if ( negate_next_x )
+						
+						if ( l_x < 0 && final_x > 0 )
 						{
 							final_x *= -1;
 						}
-						if ( negate_next_y )
+						if ( l_y < 0 && final_y > 0 )
 						{
 							final_y *= -1;
 						}
-						if ( negate_next_z )
+						if ( l_z < 0 && final_z > 0 )
 						{
 							final_z *= -1;
 						}
@@ -1485,15 +1148,15 @@ public class CmdExecutor implements CommandExecutor
 						final_x = x;
 						final_y = y;
 						final_z = z;
-						if ( negate_x )
+						if ( l_x < 0 && final_x > 0 )
 						{
 							final_x *= -1;
 						}
-						if ( negate_y )
+						if ( l_y < 0 && final_y > 0 )
 						{
 							final_y *= -1;
 						}
-						if ( negate_z )
+						if ( l_z < 0 && final_z > 0 )
 						{
 							final_z *= -1;
 						}
@@ -1512,6 +1175,63 @@ public class CmdExecutor implements CommandExecutor
 			portal = locs_ports.get(final_loc);
 		}
 		return portal;
+	}
+	
+	public Integer getDiff(int value1, int value2)
+	{
+		int diff = 0;
+		if ( value1 < 0 && value2 < 0 )
+		{
+			value1 *= -1;
+			value2 *= -1;
+			if ( value1 < value2 )
+			{
+				diff = value2 - value1;
+			}
+			else
+			{
+				diff = value1 - value2;
+			}
+		}
+		else if ( value1 > 0 && value2 > 0 )
+		{
+			if ( value1 > value2 )
+			{
+				diff = value1 - value2;
+			}
+			else
+			{
+				diff = value2 - value1;
+			}
+		}
+		else
+		{
+			if ( value1 < 0 && value2 > 0 )
+			{
+				value1 *= -1;
+				if ( value1 < value2 )
+				{
+					diff = value2 - value1;
+				}
+				else
+				{
+					diff = value1 - value2;
+				}
+			}
+			else
+			{
+				value2 *= -1;
+				if ( value2 < value1 )
+				{
+					diff = value1 - value2;
+				}
+				else
+				{
+					diff = value2 - value1;
+				}
+			}
+		}
+		return diff;
 	}
 	
 	/**
@@ -1601,6 +1321,8 @@ public class CmdExecutor implements CommandExecutor
 		int y = p.getY();
 		int z = p.getZ();
 		String world = p.getWorld();
+		z = z-1; //FIXME: coordinate wird falsch gespeichert
+		x = x-1;
 		Location pl = new Location(Bukkit.getWorld(world), x, y, z);
 		Location x_minus_1 = new Location(Bukkit.getWorld(world), (x-1), y, z);
 		Location x_minus_2 = new Location(Bukkit.getWorld(world), (x-2), y, z);
@@ -1633,6 +1355,7 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else if ( !(x_minus_1.getBlock().getType().equals(Material.AIR)) && x_plus_1.getBlock().getType().equals(Material.AIR) && !(x_plus_2.getBlock().getType().equals(Material.AIR)) )
 		{
+			//FIXME: if-bedingung ändern
 			portalblocks.add(pl.getBlock());
 			portalblocks.add(x_plus_1.getBlock());
 			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
