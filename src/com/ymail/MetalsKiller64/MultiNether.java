@@ -17,8 +17,13 @@ public final class MultiNether extends JavaPlugin
 {
     
     public List<String> command_list = new ArrayList<String>();
+	
 	public FileConfiguration portal_config = null;
 	public File portal_config_file = null;
+	
+	public FileConfiguration reverse_portal_config = null;
+	public File reverse_portal_config_file = null;
+	
 	public CmdExecutor cmd;
     
     @Override
@@ -37,13 +42,15 @@ public final class MultiNether extends JavaPlugin
 		getCommand("netherport").setExecutor(new CmdExecutor(this));
 		getCommand("cmdtest").setExecutor(new CmdExecutor(this));
 		this.portal_config = getPortalConfig();
+		this.reverse_portal_config = getReversePortalConfig();
 		savePortalConfig();
+		saveReversePortalConfig();
 		getConfig().options().copyDefaults(true); //FIXME: Defaults überschreiben??
 		getConfig().set("LinkWorlds", true);
 		getConfig().set("PortalCount", 0);
 		saveConfig();
 		
-		NetherPortListener test = new NetherPortListener(this);
+		NetherPortListener npl = new NetherPortListener(this);
 		
 		//PluginManager pm = Bukkit.getServer().getPluginManager();
 		//pm.registerEvents(new NetherPortListener(), this);
@@ -90,10 +97,52 @@ public final class MultiNether extends JavaPlugin
 			{
 				portal_config.save(portal_config_file);
 			}
-			catch (IOException e)
+			catch ( IOException ioe )
 			{
 				Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Konnte Portal-Config nicht speichern! (IOException)");
 			}
 		}
 	}
+	
+	
+	public FileConfiguration getReversePortalConfig()
+	{
+		if ( reverse_portal_config == null )
+		{
+			loadReversePortalConfig();
+		}
+		return reverse_portal_config;
+	}
+	
+	public void loadReversePortalConfig()
+	{
+		if ( reverse_portal_config_file == null )
+		{
+			reverse_portal_config_file = new File(getDataFolder(), "ReversePortals.yml");
+		}
+		reverse_portal_config = YamlConfiguration.loadConfiguration(reverse_portal_config_file);
+		
+		InputStream defConfigStream = getResource("ReversePortals.yml");
+		if ( defConfigStream != null )
+		{
+			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+			reverse_portal_config.setDefaults(defConfig);
+		}
+	}
+	
+	public void saveReversePortalConfig()
+	{
+		if ( !(reverse_portal_config == null) && !(reverse_portal_config_file == null) )
+		{
+			try
+			{
+				reverse_portal_config.save(reverse_portal_config_file);
+			}
+			catch ( IOException ioe )
+			{
+				Logger.getLogger(JavaPlugin.class.getName()).log(Level.SEVERE, "Konnte ReversePortal-Config nicht speichern! (IOException)");
+			}
+		}
+	}
+	
 }

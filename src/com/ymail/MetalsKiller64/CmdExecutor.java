@@ -686,6 +686,119 @@ public class CmdExecutor implements CommandExecutor
 		return p;
 	}
 	
+	
+	public Portal createReversePortal(Location loc, String world)
+	{
+		multinether.getLogger().log(Level.INFO, ">>> createReversePortal <<<");
+		Portal p = new Portal();
+		Location location = new Location(Bukkit.getWorld(world), loc.getX(), loc.getY(), loc.getZ());
+		//TODO: Portal-Rahmen
+		//sender.sendMessage(""+getPortalIDs().size());
+		Integer id = 0;
+		if ( !(getReversePortalIDs().isEmpty()) )
+		{
+			List<Integer> ids = getReversePortalIDs();
+			for ( int i = 0; i < ids.size(); i++ )
+			{
+				if ( !(ids.contains(i)) )
+				{
+					//sender.sendMessage(""+i);
+					Portal check_p = getPortal(i);
+					if ( check_p == null )
+					{
+						id = i;
+					}
+					//sender.sendMessage("id = "+i);
+				}
+			}
+			if ( id == 0 )
+			{
+				id = ids.size();
+			}
+		}
+		Double x = location.getX();
+		Double y = location.getY();
+		Double z = location.getZ();
+		Integer p_x = x.intValue();
+		Integer p_y = y.intValue();
+		Integer p_z = z.intValue();
+
+		p = new Portal();
+		p.setLocation(location);
+		p.setLinkTo(loc.getWorld().getName());
+		p.setID(id);
+		p.setX(p_x);
+		p.setY(p_y);
+		p.setZ(p_z);
+
+		boolean saved = saveReversePortal(p);
+		if ( saved )
+		{
+			multinether.getLogger().log(Level.INFO, "created and saved reverse-portal");
+			buildPortalFrame(location);
+		}
+		else
+		{
+			multinether.getLogger().log(Level.SEVERE, "couldn't create reverse-portal!");
+		}
+		
+		return p;
+	}
+	
+	public void buildPortalFrame(Location loc)
+	{
+		Block loc_block = loc.getBlock();
+		int y = loc_block.getY();
+		int x = loc_block.getX();
+		int z = loc_block.getZ();
+		
+		loc_block.setType(Material.GLOWSTONE);
+		new Location(loc.getWorld(), (x-1), y, z).getBlock().setType(Material.GLOWSTONE);
+		new Location(loc.getWorld(), (x-1), (y+1), z).getBlock().setType(Material.GLOWSTONE);
+		new Location(loc.getWorld(), (x), (y+1), z).getBlock().setType(Material.GLOWSTONE);
+		new Location(loc.getWorld(), x, (y+2), z).getBlock().setType(Material.GLOWSTONE);
+		new Location(loc.getWorld(), (x-1), (y+2), z).getBlock().setType(Material.GLOWSTONE);
+		
+		loc_block.setType(Material.AIR);
+		new Location(loc.getWorld(), (x-1), y, z).getBlock().setType(Material.AIR);
+		new Location(loc.getWorld(), (x-1), (y+1), z).getBlock().setType(Material.AIR);
+		new Location(loc.getWorld(), (x), (y+1), z).getBlock().setType(Material.AIR);
+		new Location(loc.getWorld(), x, (y+2), z).getBlock().setType(Material.AIR);
+		new Location(loc.getWorld(), (x-1), (y+2), z).getBlock().setType(Material.AIR);
+		
+		List<Location> frame_blocks = new ArrayList<Location>();
+		frame_blocks.add(new Location(loc.getWorld(), x, (y-1), z));
+		frame_blocks.add(new Location(loc.getWorld(), (x-1), (y-1), z));
+		frame_blocks.add(new Location(loc.getWorld(), (x-2), (y-1), z));
+		frame_blocks.add(new Location(loc.getWorld(), (x+1), (y-1), z));
+		
+		frame_blocks.add(new Location(loc.getWorld(), (x-1), y, z));
+		frame_blocks.add(new Location(loc.getWorld(), (x-2), y, z));
+		frame_blocks.add(new Location(loc.getWorld(), (x+1), y, z));
+		
+		frame_blocks.add(new Location(loc.getWorld(), (x-2), (y+1), z));
+		frame_blocks.add(new Location(loc.getWorld(), (x+1), (y+1), z));
+		
+		frame_blocks.add(new Location(loc.getWorld(), (x-2), (y+2), z));
+		frame_blocks.add(new Location(loc.getWorld(), (x+1), (y+2), z));
+		
+		frame_blocks.add(new Location(loc.getWorld(), (x-2), (y+3), z));
+		frame_blocks.add(new Location(loc.getWorld(), (x-1), (y+3), z));
+		frame_blocks.add(new Location(loc.getWorld(), x, (y+3), z));
+		frame_blocks.add(new Location(loc.getWorld(), (x+1), (y+3), z));
+		
+		
+		for ( int i = 0; i < frame_blocks.size(); i++ )
+		{
+			frame_blocks.get(i).getBlock().setType(Material.GLOWSTONE);
+		}
+		
+		for ( int i = 0; i < frame_blocks.size(); i++ )
+		{
+			frame_blocks.get(i).getBlock().setType(Material.OBSIDIAN);
+		}
+	}
+	
 	public boolean savePortal(Portal p)
 	{
 		multinether.getLogger().log(Level.INFO, ">>> savePortal <<<");
@@ -694,7 +807,6 @@ public class CmdExecutor implements CommandExecutor
 			//Map<String, Object> portal = new HashMap<String, Object>();
 			//portal.put(""+p.getID(), p.getLocation()+", "+p.getLinkTo());
 			
-			multinether.getLogger().log(Level.INFO, ">>> savePortal <<<");
 			Integer id = p.getID();
 			Location l = p.getLocation();
 			String world = l.getWorld().getName();
@@ -735,6 +847,57 @@ public class CmdExecutor implements CommandExecutor
 			}
 			portalcount++;
 			multinether.getConfig().set(portalcount_path, portalcount);
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean saveReversePortal(Portal p)
+	{
+		multinether.getLogger().log(Level.INFO, ">>> saveReversePortal <<<");
+		if ( !( getReversePortalIDs().contains(p.getID()) ) )
+		{
+			//Map<String, Object> portal = new HashMap<String, Object>();
+			//portal.put(""+p.getID(), p.getLocation()+", "+p.getLinkTo());
+			
+			Integer id = p.getID();
+			Location l = p.getLocation();
+			String world = l.getWorld().getName();
+			
+			/*Double x = l.getX();
+			Double y = l.getY();
+			Double z = l.getZ();
+			*/
+			Integer x = p.getX();
+			Integer y = p.getY();
+			Integer z = p.getZ();
+			String link = p.getLinkTo();
+			
+			//netherrep.getPortalConfig().addDefault(""+id, "");
+			multinether.getLogger().log(Level.INFO, "{0}", id);
+			ConfigurationSection new_portal_section = multinether.getReversePortalConfig().createSection(""+id);
+			ConfigurationSection portal_location = new_portal_section.createSection("location");
+			portal_location.set("world", world);
+			portal_location.set("x", x);
+			portal_location.set("y", y);
+			portal_location.set("z", z);
+			
+			new_portal_section.set("linkto", link);
+			
+			multinether.saveReversePortalConfig();
+			/*
+			int portalcount = 0;
+			try
+			{
+				portalcount = (Integer) multinether.getConfig().get(portalcount_path);
+			}
+			catch ( NullPointerException npe )
+			{
+				
+			}
+			portalcount++;
+			multinether.getConfig().set(portalcount_path, portalcount);
+			*/
 			return true;
 		}
 		return false;
@@ -1262,6 +1425,103 @@ public class CmdExecutor implements CommandExecutor
 		return portals;
 	}
 	
+	
+	public Portal getReversePortal(Integer id)
+	{
+		multinether.getLogger().log(Level.INFO, ">>> getPortal <<<");
+		Portal p = null;
+		List<Portal> all_reverse_portals = getAllReversePortals();
+		multinether.getLogger().log(Level.INFO, all_reverse_portals.toString());
+		if ( !(all_reverse_portals.isEmpty()) )
+		{
+			for ( int i = 0; i < all_reverse_portals.size(); i++ )
+			{
+				multinether.getLogger().log(Level.INFO, all_reverse_portals.get(i).toString());
+				multinether.getLogger().log(Level.INFO, all_reverse_portals.get(i).getID().toString());
+				if ( all_reverse_portals.get(i).getID().equals(id) )
+				{
+					p = all_reverse_portals.get(i);
+					multinether.getLogger().log(Level.INFO, p.toString());
+				}
+			}
+		}
+		return p;
+	}
+	
+	public Integer getReversePortalId(Location l)
+	{
+		multinether.getLogger().log(Level.INFO, ">>> getPortalId <<<");
+		//TODO: Fehlerbehandlung hinzufügen
+		Integer portal_id = null;
+		List<Portal> all_reverse_portals = getAllReversePortals();
+		for ( int i = 0; i < all_reverse_portals.size(); i++ )
+		{
+			Portal current_portal = all_reverse_portals.get(i);
+			if ( current_portal.getLocation().getX() == l.getX() && current_portal.getLocation().getY() == l.getY() && current_portal.getLocation().getZ() == l.getZ() )
+			{
+				portal_id = current_portal.getID();
+			}
+		}
+		return portal_id;
+	}
+	
+	
+	public List<Portal> getAllReversePortals()
+	{
+		multinether.getLogger().log(Level.INFO, ">>> getAllReversePortals <<<");
+		multinether.reloadConfig();
+		List<Portal> portals = new ArrayList<Portal>();
+		List<Integer> ids = getReversePortalIDs();
+		for ( Integer current_id : ids )
+		{
+			//Integer current_id = ids.get(i);
+			ConfigurationSection portal_section = multinether.getReversePortalConfig().getConfigurationSection(current_id.toString());
+			ConfigurationSection location_section = portal_section.getConfigurationSection("location");
+			Integer p_x = location_section.getInt("x");
+			Integer p_y = location_section.getInt("y");
+			Integer p_z = location_section.getInt("z");
+			String p_world = location_section.getString("world");
+			//multinether.getLogger().log(Level.INFO, "world = {0}", p_world);
+			String p_link = portal_section.getString("linkto");
+			Portal current_portal = new Portal();
+			current_portal.setID(current_id);
+			current_portal.setWorld(p_world);
+			current_portal.setX(p_x);
+			current_portal.setY(p_y);
+			current_portal.setZ(p_z);
+			current_portal.setLinkTo(p_link);
+			portals.add(current_portal);
+		}
+		return portals;
+	}
+	
+	public List<Integer> getReversePortalIDs()
+	{
+		multinether.getLogger().log(Level.INFO, ">>> getReversePortalIDs <<<");
+		List<Integer> portal_ids = new ArrayList<Integer>();
+		multinether.reloadConfig();
+		FileConfiguration reverse_portal_conf = multinether.getReversePortalConfig();
+		Set<String> keys = reverse_portal_conf.getKeys(true);
+		Object[] key_list = keys.toArray();
+		for ( int i = 0; i < key_list.length; i++ )
+		{
+			try
+			{
+				Integer current_id = Integer.parseInt(key_list[i].toString());
+				portal_ids.add(current_id);
+			}
+			catch ( ClassCastException cce )
+			{
+				continue;
+			}
+			catch ( NumberFormatException nfe )
+			{
+				continue;
+			}
+		}
+		return portal_ids;
+	}
+	
 	public void generateNether(String worldname)
 	{
 		Long seed = Bukkit.getWorld(worldname).getSeed();
@@ -1386,6 +1646,7 @@ public class CmdExecutor implements CommandExecutor
 		{
 			portalblocks.get(i).setType(Material.PORTAL);
 		}
+		createReversePortal(pl, p.getLinkTo());
 		
 		
 		//Block pb = pl.getBlock();
