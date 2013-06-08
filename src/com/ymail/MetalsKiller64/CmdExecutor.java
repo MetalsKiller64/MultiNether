@@ -315,6 +315,12 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else if ( cmd.getName().equals("cmdtest") )
 		{
+			//Portal p = getPortal(22);
+			Player pl = (Player)sender;
+			Location p_loc = pl.getLocation();
+			Portal portal = getNearestPortal(p_loc);
+			sender.sendMessage("found Portal: "+portal.getID());
+			//openPortal(p, pl);
 			//generateNether("Welt3");
 			/*
 			if ( sender instanceof Player )
@@ -1044,6 +1050,470 @@ public class CmdExecutor implements CommandExecutor
 		return near_portals;
 	}
 	
+	public Portal getNearestPortal(Location location)
+	{
+		List<Portal> near_portals = getNearPortals(location);
+		String world = location.getWorld().getName();
+		List<Location> portal_locations = new ArrayList<Location>();
+		Map<Location, Portal> locs_ports = new HashMap<Location, Portal>();
+		Portal portal = null ;
+		if ( near_portals.size() == 1 )
+		{
+			portal = near_portals.get(0);
+		}
+		else
+		{
+			for ( int i = 0; i < near_portals.size(); i++ )
+			{
+				Portal current_portal = near_portals.get(i);
+				int x = current_portal.getX();
+				int y = current_portal.getY();
+				int z = current_portal.getZ();
+				//String world = current_portal.getWorld();
+				Location p_loc = new Location(Bukkit.getWorld(world), x, y, z);
+				portal_locations.add(p_loc);
+				locs_ports.put(p_loc, current_portal);
+				
+				multinether.getLogger().log(Level.INFO, "portal x = "+x);
+				multinether.getLogger().log(Level.INFO, "portal y = "+y);
+				multinether.getLogger().log(Level.INFO, "portal z = "+z);
+			}
+			int l_x = location.getBlock().getX();
+			int l_y = location.getBlock().getY();
+			int l_z = location.getBlock().getZ();
+			
+			int final_x = 0;
+			int final_y = 0;
+			int final_z = 0;
+			for ( int j = 0; j < portal_locations.size(); j++ )
+			{
+				Location c_loc = portal_locations.get(j);
+				int x = c_loc.getBlock().getX();
+				int y = c_loc.getBlock().getY();
+				int z = c_loc.getBlock().getZ();
+				int x_diff = 0;
+				int y_diff = 0;
+				int z_diff = 0;
+				boolean negate_x = false;
+				boolean negate_y = false;
+				boolean negate_z = false;
+				
+				//x
+				if ( x < 0 && l_x < 0 )
+				{
+					multinether.getLogger().log(Level.INFO, "both x negative");
+					multinether.getLogger().log(Level.INFO, "x = "+x);
+					multinether.getLogger().log(Level.INFO, "l_x = "+l_x);
+
+					x *= -1;
+					l_x *= -1;
+					negate_x = true;
+					multinether.getLogger().log(Level.INFO, "x = "+x);
+					multinether.getLogger().log(Level.INFO, "l_x = "+l_x);
+					if ( x < l_x )
+					{
+						x_diff = l_x - x;
+					}
+					else
+					{
+						x_diff = x - l_x;
+					}
+				}
+				else if ( l_x > 0 && x > 0 )
+				{
+					multinether.getLogger().log(Level.INFO, "both x positive");
+					if ( l_x > x )
+					{
+						x_diff = l_x - x;
+					}
+					else
+					{
+						x_diff = x - l_x;
+					}
+				}
+				else
+				{
+					multinether.getLogger().log(Level.INFO, "x - one on one");
+					if ( l_x < 0 && x > 0 )
+					{
+						l_x *= -1;
+						if ( l_x < x )
+						{
+							x_diff = x - l_x;
+						}
+						else
+						{
+							x_diff = l_x - x;
+						}
+					}
+					else
+					{
+						x *= -1;
+						negate_x = true;
+						if ( x < l_x )
+						{
+							x_diff = l_x - x;
+						}
+						else
+						{
+							x_diff = x - l_x;
+						}
+					}
+				}
+				//y
+				if ( l_y < 0 && y < 0 )
+				{
+					multinether.getLogger().log(Level.INFO, "both y negative");
+					negate_y = true;
+					l_y *= -1;
+					y *= -1;
+					if ( l_y < y )
+					{
+						y_diff = y - l_y;
+					}
+					else
+					{
+						y_diff = l_y - y;
+					}
+				}
+				else if ( l_y > 0 && y > 0 )
+				{
+					multinether.getLogger().log(Level.INFO, "both y positive");
+					if ( l_y > y )
+					{
+						y_diff = l_y - y;
+					}
+					else
+					{
+						y_diff = y - l_y;
+					}
+				}
+				else
+				{
+					multinether.getLogger().log(Level.INFO, "y - one on one");
+					if ( l_y < 0 && y > 0 )
+					{
+						l_y *= -1;
+						if ( l_y < y )
+						{
+							y_diff = y - l_y;
+						}
+						else
+						{
+							y_diff = l_y - y;
+						}
+					}
+					else
+					{
+						negate_y = true;
+						y *= -1;
+						if ( y < l_y )
+						{
+							y_diff = l_y - y;
+						}
+						else
+						{
+							y_diff = y - l_y;
+						}
+					}
+				}
+				//z
+				if ( l_z < 0 && z < 0 )
+				{
+					multinether.getLogger().log(Level.INFO, "both z negative");
+					z *= -1;
+					l_z *= -1;
+					negate_z = true;
+					if ( l_z < z )
+					{
+						z_diff = z - l_z;
+					}
+					else
+					{
+						z_diff = l_z - z;
+					}
+				}
+				else if ( l_z > 0 && z > 0 )
+				{
+					multinether.getLogger().log(Level.INFO, "both z negative");
+					if ( l_z > z )
+					{
+						z_diff = l_z - z;
+					}
+					else
+					{
+						z_diff = z - l_z;
+					}
+				}
+				else
+				{
+					multinether.getLogger().log(Level.INFO, "z - one on one");
+					if ( l_z < 0 && z > 0 )
+					{
+						l_z *= -1;
+						if ( l_z < z )
+						{
+							z_diff = z - l_z;
+						}
+						else
+						{
+							z_diff = l_z - z;
+						}
+					}
+					else
+					{
+						z *= -1;
+						negate_z = true;
+						if ( z < l_z )
+						{
+							z_diff = l_z - z;
+						}
+						else
+						{
+							z_diff = z - l_z;
+						}
+					}
+				}
+				
+				if ( j != portal_locations.size()-1 )
+				{
+					Location next_loc = portal_locations.get(j+1);
+					int next_x = next_loc.getBlock().getX();
+					int next_y = next_loc.getBlock().getY();
+					int next_z = next_loc.getBlock().getZ();
+					
+					int next_x_diff = 0;
+					int next_y_diff = 0;
+					int next_z_diff = 0;
+					
+					boolean negate_next_x = false;
+					boolean negate_next_y = false;
+					boolean negate_next_z = false;
+					
+					//x
+					if ( next_x < 0 && l_x < 0 )
+					{
+						x *= -1;
+						l_x *= -1;
+						negate_next_x = true;
+						if ( next_x < l_x )
+						{
+							next_x_diff = l_x - next_x;
+						}
+						else
+						{
+							next_x_diff = next_x - l_x;
+						}
+					}
+					else if ( next_x > 0 && l_x > 0 )
+					{
+						if ( next_x > l_x )
+						{
+							next_x_diff = next_x - l_x;
+						}
+						else
+						{
+							next_x_diff = l_x - next_x;
+						}
+					}
+					else
+					{
+						if ( next_x < 0 && l_x > 0 )
+						{
+							next_x *= -1;
+							negate_next_x = true;
+							if ( next_x < l_x )
+							{
+								next_x_diff = l_x - next_x;
+							}
+							else
+							{
+								next_x_diff = next_x - l_x;
+							}
+						}
+						else
+						{
+							l_x *= -1;
+							if ( l_x < next_x )
+							{
+								next_x_diff = next_x - l_x;
+							}
+							else
+							{
+								next_x_diff = l_x - next_x;
+							}
+						}
+					}
+					//y
+					if ( next_y < 0 && l_y < 0 )
+					{
+						y *= -1;
+						l_y *= -1;
+						negate_next_y = true;
+						if ( next_y < l_y )
+						{
+							next_y_diff = l_y - next_y;
+						}
+						else
+						{
+							next_y_diff = next_y - l_y;
+						}
+					}
+					else if ( next_y > 0 && l_y > 0 )
+					{
+						if ( next_y > l_y )
+						{
+							next_y_diff = next_y - l_y;
+						}
+						else
+						{
+							next_y_diff = l_y - next_y;
+						}
+					}
+					else
+					{
+						if ( next_y < 0 && l_y > 0 )
+						{
+							next_y *= -1;
+							negate_next_y = true;
+							if ( next_y < l_y )
+							{
+								next_y_diff = l_y - next_y;
+							}
+							else
+							{
+								next_y_diff = next_y - l_y;
+							}
+						}
+						else
+						{
+							l_y *= -1;
+							if ( l_y < next_y )
+							{
+								next_y_diff = next_y - l_y;
+							}
+							else
+							{
+								next_y_diff = l_y - next_y;
+							}
+						}
+					}
+					//z
+					if ( next_z < 0 && l_z < 0 )
+					{
+						z *= -1;
+						l_z *= -1;
+						negate_next_z = true;
+						if ( next_z < l_z )
+						{
+							next_z_diff = l_z - next_z;
+						}
+						else
+						{
+							next_z_diff = next_z - l_z;
+						}
+					}
+					else if ( next_z > 0 && l_z > 0 )
+					{
+						if ( next_z > l_z )
+						{
+							next_z_diff = next_z - l_z;
+						}
+						else
+						{
+							next_z_diff = l_z - next_z;
+						}
+					}
+					else
+					{
+						if ( next_z < 0 && l_z > 0 )
+						{
+							next_z *= -1;
+							negate_next_z = true;
+							if ( next_z < l_z )
+							{
+								next_z_diff = l_z - next_z;
+							}
+							else
+							{
+								next_z_diff = next_z - l_z;
+							}
+						}
+						else
+						{
+							l_z *= -1;
+							if ( l_z < next_z )
+							{
+								next_z_diff = next_z - l_z;
+							}
+							else
+							{
+								next_z_diff = l_z - next_z;
+							}
+						}
+					}
+					
+					multinether.getLogger().log(Level.INFO, "x_diff = "+x_diff);
+					multinether.getLogger().log(Level.INFO, "y_diff = "+y_diff);
+					multinether.getLogger().log(Level.INFO, "z_diff = "+z_diff);
+					
+					multinether.getLogger().log(Level.INFO, "next_x_diff = "+next_x_diff);
+					multinether.getLogger().log(Level.INFO, "next_y_diff = "+next_y_diff);
+					multinether.getLogger().log(Level.INFO, "nest_z_diff = "+next_z_diff);
+					
+					if ( next_x_diff <= x_diff && next_y_diff <= y_diff && next_z_diff <= z_diff )
+					{
+						final_x = next_x;
+						final_y = next_y;
+						final_z = next_z;
+						if ( negate_next_x )
+						{
+							final_x *= -1;
+						}
+						if ( negate_next_y )
+						{
+							final_y *= -1;
+						}
+						if ( negate_next_z )
+						{
+							final_z *= -1;
+						}
+						multinether.getLogger().log(Level.INFO, "next");
+					}
+					else
+					{
+						final_x = x;
+						final_y = y;
+						final_z = z;
+						if ( negate_x )
+						{
+							final_x *= -1;
+						}
+						if ( negate_y )
+						{
+							final_y *= -1;
+						}
+						if ( negate_z )
+						{
+							final_z *= -1;
+						}
+						multinether.getLogger().log(Level.INFO, "current");
+					}
+					multinether.getLogger().log(Level.INFO, "final_x: "+final_x);
+					multinether.getLogger().log(Level.INFO, "final_y: "+final_y);
+					multinether.getLogger().log(Level.INFO, "final_z: "+final_z);
+				}
+			}
+			
+			multinether.getLogger().log(Level.INFO, "final_x: "+final_x);
+			multinether.getLogger().log(Level.INFO, "final_y: "+final_y);
+			multinether.getLogger().log(Level.INFO, "final_z: "+final_z);
+			Location final_loc = new Location(Bukkit.getWorld(world), final_x, final_y, final_z);
+			portal = locs_ports.get(final_loc);
+		}
+		return portal;
+	}
+	
 	/**
 	 * Liest die IDs aller gespeicherten Portale aus der PortalConfig.
 	 * @return Gibt eine Liste von allen gefundenen IDs zurück.
@@ -1132,12 +1602,113 @@ public class CmdExecutor implements CommandExecutor
 		int z = p.getZ();
 		String world = p.getWorld();
 		Location pl = new Location(Bukkit.getWorld(world), x, y, z);
-		Location r1 = new Location(Bukkit.getWorld(world), (x-1), y, z);
-		
-		Block pb = pl.getBlock();
-		if ( pb.getType().equals(Material.AIR) )
+		Location x_minus_1 = new Location(Bukkit.getWorld(world), (x-1), y, z);
+		Location x_minus_2 = new Location(Bukkit.getWorld(world), (x-2), y, z);
+		Location x_plus_1 = new Location(Bukkit.getWorld(world), (x+1), y, z);
+		Location x_plus_2 = new Location(Bukkit.getWorld(world), (x+2), y, z);
+		Location z_minus_1 = new Location(Bukkit.getWorld(world), x, y, (z-1));
+		Location z_minus_2 = new Location(Bukkit.getWorld(world), x, y, (z-2));
+		Location z_plus_1 = new Location(Bukkit.getWorld(world), x, y, (z+1));
+		Location z_plus_2 = new Location(Bukkit.getWorld(world), x, y, (z+2));
+		List<Block> portalblocks = new ArrayList<Block>();
+		if ( x_minus_1.getBlock().getType().equals(Material.AIR) && !(x_minus_2.getBlock().getType().equals(Material.AIR)) && !(x_plus_1.getBlock().getType().equals(Material.AIR)) )
 		{
-			pb.setType(Material.PORTAL);
+			portalblocks.add(pl.getBlock());
+			portalblocks.add(x_minus_1.getBlock());
+			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
+			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
+			if ( y_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2.getBlock().getType().equals(Material.AIR) )
+			{
+				portalblocks.add(y_plus_1.getBlock());
+				portalblocks.add(y_plus_2.getBlock());
+				Location y_plus_1_x_minus_1 = new Location(Bukkit.getWorld(world), (x-1), (y+1), z);
+				Location y_plus_2_x_minus_1 = new Location(Bukkit.getWorld(world), (x-1), (y+2), z);
+				if ( y_plus_1_x_minus_1.getBlock().getType().equals(Material.AIR) && y_plus_2_x_minus_1.getBlock().getType().equals(Material.AIR) )
+				{
+					portalblocks.add(y_plus_1_x_minus_1.getBlock());
+					portalblocks.add(y_plus_2_x_minus_1.getBlock());
+					multinether.getLogger().log(Level.INFO, "portal on x axis (1)");
+				}
+			}
 		}
+		else if ( !(x_minus_1.getBlock().getType().equals(Material.AIR)) && x_plus_1.getBlock().getType().equals(Material.AIR) && !(x_plus_2.getBlock().getType().equals(Material.AIR)) )
+		{
+			portalblocks.add(pl.getBlock());
+			portalblocks.add(x_plus_1.getBlock());
+			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
+			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
+			if ( y_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2.getBlock().getType().equals(Material.AIR) )
+			{
+				portalblocks.add(y_plus_1.getBlock());
+				portalblocks.add(y_plus_2.getBlock());
+				Location y_plus_1_x_plus_1 = new Location(Bukkit.getWorld(world), (x+1), (y+1), z);
+				Location y_plus_2_x_plus_1 = new Location(Bukkit.getWorld(world), (x+1), (y+2), z);
+				if ( y_plus_1_x_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2_x_plus_1.getBlock().getType().equals(Material.AIR) )
+				{
+					portalblocks.add(y_plus_1_x_plus_1.getBlock());
+					portalblocks.add(y_plus_2_x_plus_1.getBlock());
+					multinether.getLogger().log(Level.INFO, "portal on x axis (2)");
+				}
+			}
+		}
+		else if ( z_minus_1.getBlock().getType().equals(Material.AIR) && !(z_minus_2.getBlock().getType().equals(Material.AIR)) && !(z_plus_1.getBlock().getType().equals(Material.AIR)) )
+		{
+			portalblocks.add(pl.getBlock());
+			portalblocks.add(z_minus_1.getBlock());
+			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
+			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
+			if ( y_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2.getBlock().getType().equals(Material.AIR) )
+			{
+				portalblocks.add(y_plus_1.getBlock());
+				portalblocks.add(y_plus_2.getBlock());
+				Location y_plus_1_z_minus_1 = new Location(Bukkit.getWorld(world), x, (y+1), (z-1));
+				Location y_plus_2_z_minus_1 = new Location(Bukkit.getWorld(world), x, (y+2), (z-1));
+				if ( y_plus_1_z_minus_1.getBlock().getType().equals(Material.AIR) && y_plus_2_z_minus_1.getBlock().getType().equals(Material.AIR) )
+				{
+					portalblocks.add(y_plus_1_z_minus_1.getBlock());
+					portalblocks.add(y_plus_2_z_minus_1.getBlock());
+					multinether.getLogger().log(Level.INFO, "portal on z axis (1)");
+				}
+			}
+		}
+		else if ( !(z_minus_1.getBlock().getType().equals(Material.AIR)) && z_plus_1.getBlock().getType().equals(Material.AIR) && !(z_plus_2.getBlock().getType().equals(Material.AIR)) )
+		{
+			portalblocks.add(pl.getBlock());
+			portalblocks.add(z_plus_1.getBlock());
+			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
+			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
+			if ( y_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2.getBlock().getType().equals(Material.AIR) )
+			{
+				portalblocks.add(y_plus_1.getBlock());
+				portalblocks.add(y_plus_2.getBlock());
+				Location y_plus_1_z_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), (z+1));
+				Location y_plus_2_z_plus_1 = new Location(Bukkit.getWorld(world), x, (y+2), (z+1));
+				if ( y_plus_1_z_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2_z_plus_1.getBlock().getType().equals(Material.AIR) )
+				{
+					portalblocks.add(y_plus_1_z_plus_1.getBlock());
+					portalblocks.add(y_plus_2_z_plus_1.getBlock());
+					multinether.getLogger().log(Level.INFO, "portal on z axis (2)");
+				}
+			}
+		}
+		
+		multinether.getLogger().log(Level.INFO, "pb size = "+portalblocks.size());
+		//pl.getBlock().setType(Material.PORTAL);
+		
+		for ( int i = 0; i < portalblocks.size(); i++ )
+		{
+			portalblocks.get(i).setType(Material.GLOWSTONE);
+		}
+		for ( int i = 0; i < portalblocks.size(); i++ )
+		{
+			portalblocks.get(i).setType(Material.PORTAL);
+		}
+		
+		
+		//Block pb = pl.getBlock();
+		//if ( pb.getType().equals(Material.AIR) )
+		//{
+		//	pb.setType(Material.PORTAL);
+		//}
 	}
 }
