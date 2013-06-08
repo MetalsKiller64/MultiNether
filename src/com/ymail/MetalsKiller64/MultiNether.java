@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.*;
@@ -18,6 +19,7 @@ public final class MultiNether extends JavaPlugin
     public List<String> command_list = new ArrayList<String>();
 	public FileConfiguration portal_config = null;
 	public File portal_config_file = null;
+	public CmdExecutor cmd;
     
     @Override
     public void onEnable()
@@ -27,6 +29,9 @@ public final class MultiNether extends JavaPlugin
 		command_list.add("netherport");
 		command_list.add("functest");
 		//TODO: for-schleife über command_list
+		
+		 cmd = new CmdExecutor(this);
+		
 		getCommand("rtp").setExecutor(new CmdExecutor(this));
 		getCommand("netherlink").setExecutor(new CmdExecutor(this));
 		getCommand("netherport").setExecutor(new CmdExecutor(this));
@@ -37,6 +42,11 @@ public final class MultiNether extends JavaPlugin
 		getConfig().set("LinkWorlds", true);
 		getConfig().set("PortalCount", 0);
 		saveConfig();
+		
+		NetherPortListener test = new NetherPortListener(this);
+		
+		//PluginManager pm = Bukkit.getServer().getPluginManager();
+		//pm.registerEvents(new NetherPortListener(), this);
 		//TODO: Befehl zum automatischen Erstellen eines Nethers zur angegebenen Welt mit passendem Seed
 		//TODO: Nether-Portale; zu jedem Portal auf der Oberwelt ein Portal im zugehörigen Nether generieren; in Verbindung mit Config
     }

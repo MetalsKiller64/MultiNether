@@ -1,94 +1,65 @@
 package com.ymail.MetalsKiller64;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.block.Block;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.entity.Player;
+
+//import java.util.Arrays;
+//import java.util.logging.Logger;
 //import java.util.logging.Level;
+
+//import org.bukkit.Chunk;
+//import org.bukkit.generator.ChunkGenerator;
 //import org.bukkit.plugin.Plugin;
 
 public class CmdExecutor implements CommandExecutor
 {
-    private MultiNether multinether;
-    private List<String> command_list;
-    //private List<World> world_list;
-    private List<String> link_list;
-    private List<String> config_path_list;
-	//private List<Integer> portal_id_list;
-	//private List<Portal> portal_list;
+	private MultiNether multinether;
+	private List<String> command_list;
+	private List<String> link_list;
+	private List<String> config_path_list;
 	private String netherlink_path;
 	private String portalcount_path;
-    
-    public CmdExecutor(MultiNether plugin)
-    {
+	
+	public CmdExecutor(MultiNether plugin)
+	{
 		this.multinether = plugin;
 		this.command_list = multinether.command_list;
-		//this.world_list = new ArrayList<World>();
 		this.link_list = new ArrayList<String>();
-		//this.portal_id_list = new ArrayList<Integer>();
-		//this.portal_list = new ArrayList<Portal>();
 		this.config_path_list = new ArrayList<String>();
 		this.netherlink_path = "NetherLinks.";
 		this.portalcount_path = "PortalCount";
-		
-		/*
-		if ( world_list.isEmpty() )
-		{
-			setWorldList();
-		}
-		*/
-		/*
-		if ( portal_id_list.isEmpty() )
-		{
-			portal_id_list = getPortalIDs();
-		}
-		*/
-		
-		multinether.getLogger().log(Level.INFO, "world_list: {0}", Bukkit.getWorlds().toString());
-		/*
-		for ( int i = 0; i < Bukkit.getWorld("World1").getLoadedChunks().length; i++ )
-		{
-			if ( Bukkit.getWorld("World1").getLoadedChunks()[i].getBlock(i, i, i).getType().equals(Material.PORTAL) );
-		}
-		*/
-    }
-    
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
-    {
-		//setWorldList();
-		setLinkList();
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
+	{
 		if ( cmd.getName().equalsIgnoreCase("rtp") )
 		{
 			if ( sender instanceof Player )
 			{
-				//TODO: Fehlerbehandlung / Exceptionhandling in rtp-command einbauen
 				Player player = (Player) sender;
 				Location current_location = player.getLocation();
 				if ( args.length == 0 )
 				{
 					sender.sendMessage(cmd.getDescription());
-					//sender.sendMessage(cmd.getUsage());
 				}
 				else if ( args.length == 1 )
 				{
@@ -119,7 +90,6 @@ public class CmdExecutor implements CommandExecutor
 							player.teleport(loc);
 							return true;
 						}
-						//TODO: abschließenden else-Block hinzufügen
 					}
 					else if ( isNumber(args[0]) )
 					{
@@ -152,7 +122,7 @@ public class CmdExecutor implements CommandExecutor
 							//TODO: zusätzliche möglichkeiten für teleportation mit 2 argumenten: X&Z und Y&Z
 							Location loc = new Location(player.getWorld(), new Double(Double.parseDouble(args[0])), new Double(Double.parseDouble(args[1])), player.getLocation().getZ());
 							player.teleport(loc);
-
+							
 							return true;
 						}
 					}
@@ -172,17 +142,12 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else if ( cmd.getName().equalsIgnoreCase("netherlink") )
 		{
-			//TODO: Fehlerbehandlung/Exceptionhandling in netherlink-command einbauen
 			sender.sendMessage("link_list: "+getLinks());
-			//String links = netherrep.getConfig().getString("LinkList");
-			//TODO: Befehlsausführung zum Verlinken von Welten (Eintrag in Config hinzufügen/löschen/bearbeiten/anzeigen)
 			if ( args.length > 1 )
 			{
 				if ( args[0].equalsIgnoreCase("add") )
 				{
 					multinether.getLogger().log(Level.INFO, "exec add");
-					//TODO: prüfen ob Config bereits vorhanden; LinkList prüfen
-					//FIXME: Config-Werte in mehrere dynamische Paths schreiben anstatt in einen statischen
 					if ( args.length == 3 )
 					{
 						boolean added = addLink(sender, args[1], args[2]);
@@ -244,7 +209,6 @@ public class CmdExecutor implements CommandExecutor
 				multinether.getLogger().log(Level.INFO, "exec show");
 				//String links = netherrep.getConfig().getString("LinkList");
 				//links = links.replaceAll(":", " <> ");
-				//List<String> link_list = Arrays.asList(links.split(" "));
 				
 				if ( getLinks().isEmpty() )
 				{
@@ -308,14 +272,13 @@ public class CmdExecutor implements CommandExecutor
 					}
 					else
 					{
-						//TODO: Ausnahmen in else-block hinzufügen
+						
 					}
 				}
 			}
 		}
 		else if ( cmd.getName().equals("cmdtest") )
 		{
-			//Portal p = getPortal(22);
 			Player pl = (Player)sender;
 			Location p_loc = pl.getLocation();
 			Portal portal = getNearestPortal(p_loc);
@@ -363,10 +326,10 @@ public class CmdExecutor implements CommandExecutor
 		multinether.getLogger().log(Level.INFO, "anything else");
 		//sender.sendMessage("not yet implemented");
 		return false;
-    }
-    
-    public boolean isNumber(String value)
-    {
+	}
+	
+	public boolean isNumber(String value)
+	{
 		try
 		{
 			int int_test = Integer.parseInt(value);
@@ -385,11 +348,10 @@ public class CmdExecutor implements CommandExecutor
 			return true;
 		}
 		return true;
-    }
-    
-    public boolean isWorld(String value)
-    {
-		//List<World> world_list = Bukkit.getWorlds();
+	}
+	
+	public boolean isWorld(String value)
+	{
 		for (int i = 0; i < Bukkit.getWorlds().size(); i++)
 		{
 			//netherrep.getLogger().log(Level.INFO, "{0}.equalsIgnoreCase({1})", new Object[]{value, this.world_list.get(i).getName()});
@@ -399,10 +361,10 @@ public class CmdExecutor implements CommandExecutor
 			}
 		}
 		return false;
-    }
-    
-    public boolean isPlayerOnline(String value)
-    {
+	}
+	
+	public boolean isPlayerOnline(String value)
+	{
 		Player[] player_list = Bukkit.getOnlinePlayers();
 		for ( int i = 0; i < player_list.length; i++ )
 		{
@@ -412,10 +374,10 @@ public class CmdExecutor implements CommandExecutor
 			}
 		}
 		return false;
-    }
-    
-    public boolean addLink(CommandSender sender, String World1, String World2)
-    {
+	}
+	
+	public boolean addLink(CommandSender sender, String World1, String World2)
+	{
 		if ( isWorld(World1) && isWorld(World2) )
 		{
 			if ( linkExists(World1) )
@@ -453,10 +415,10 @@ public class CmdExecutor implements CommandExecutor
 			sender.sendMessage("falscher Parameter!");
 		}
 		return false;
-    }
-    
-    public boolean addLink(CommandSender sender, String World2)
-    {
+	}
+	
+	public boolean addLink(CommandSender sender, String World2)
+	{
 		if ( sender instanceof Player && isWorld(World2) )
 		{
 			Player player = (Player) sender;
@@ -481,10 +443,10 @@ public class CmdExecutor implements CommandExecutor
 			sender.sendMessage("die angegebene Welt '"+World2+"' existiert nicht!");
 		}
 		return false;
-    }
-    
-    public boolean removeLink(CommandSender sender, String Link)
-    {
+	}
+	
+	public boolean removeLink(CommandSender sender, String Link)
+	{
 		multinether.getLogger().log(Level.INFO, "exec removeLink()");
 		/*
 		 * if ( !(linkExists(Link)) )
@@ -520,7 +482,7 @@ public class CmdExecutor implements CommandExecutor
 			}
 		}
 		return false;
-    }
+	}
 	
 	public boolean linkExists(String Link)
 	{
@@ -550,16 +512,8 @@ public class CmdExecutor implements CommandExecutor
 		*/
 		return false;
 	}
-    
-	/*
-    private void setWorldList()
-    {
-		this.world_list = Bukkit.getWorlds();
-    }
-	*/
-    
-    private void setLinkList()
-    {
+	private void setLinkList()
+	{
 		//setWorldList();
 		multinether.reloadConfig();
 		link_list = new ArrayList<String>();
@@ -604,7 +558,7 @@ public class CmdExecutor implements CommandExecutor
 				//e.printStackTrace();
 			}
 		}
-    }
+	}
 	
 	public List<String> getLinks()
 	{
@@ -755,7 +709,7 @@ public class CmdExecutor implements CommandExecutor
 			String link = p.getLinkTo();
 			
 			//netherrep.getPortalConfig().addDefault(""+id, "");
-			multinether.getLogger().log(Level.INFO, ""+id);
+			multinether.getLogger().log(Level.INFO, "{0}", id);
 			ConfigurationSection new_portal_section = multinether.getPortalConfig().createSection(""+id);
 			ConfigurationSection portal_location = new_portal_section.createSection("location");
 			portal_location.set("world", world);
@@ -801,7 +755,7 @@ public class CmdExecutor implements CommandExecutor
 		return false;
 	}
 	
-	private Portal getPortal(Integer id)
+	public Portal getPortal(Integer id)
 	{
 		multinether.getLogger().log(Level.INFO, ">>> getPortal <<<");
 		Portal p = null;
@@ -838,7 +792,7 @@ public class CmdExecutor implements CommandExecutor
 		return portal_id;
 	}
 	
-	public Portal getNearActivePortal(Location l, CommandSender sender)
+	public Portal getNearActivePortal(Location l)
 	{
 		//TODO: Portale in der Nähe der Spieler-Location suchen (Suche nach Material.PORTAL)
 		Portal near_active_portal = null;
@@ -900,11 +854,12 @@ public class CmdExecutor implements CommandExecutor
 				{
 					Block current_block = Bukkit.getWorld(l.getWorld().getName()).getBlockAt(x, y, z);
 					//sender.sendMessage(""+current_block.getX()+" "+current_block.getY()+" "+current_block.getZ());
-					multinether.getLogger().log(Level.INFO, ""+current_block.getX()+" "+current_block.getY()+" "+current_block.getZ());
+					multinether.getLogger().log(Level.INFO, "{0} {1} {2}", new Object[]{current_block.getX(), current_block.getY(), current_block.getZ()});
 					if ( current_block.getType().equals(Material.PORTAL) )
 					{
 						portal_blocks_in_range.add(current_block);
-						sender.sendMessage("portal block in range: "+current_block.getX()+" "+current_block.getY()+" "+current_block.getZ());
+						//sender.sendMessage("portal block in range: "+current_block.getX()+" "+current_block.getY()+" "+current_block.getZ());
+						multinether.getLogger().log(Level.INFO, "portal block in range: "+current_block.getX()+" "+current_block.getY()+" "+current_block.getZ());
 					}
 				}
 			}
@@ -915,7 +870,7 @@ public class CmdExecutor implements CommandExecutor
 			for ( int h = 0; h < allPortals.size(); h++ )
 			{
 				Portal current_portal = allPortals.get(h);
-				Location current_portal_location = new Location(current_portal.getLocation().getWorld(), current_portal.getX(), current_portal.getY(), current_portal.getZ());
+				Location current_portal_location = new Location(Bukkit.getWorld(current_portal.getWorld()), current_portal.getX(), current_portal.getY(), current_portal.getZ());
 				portal_locations.add(current_portal_location);
 			}
 		}
@@ -941,7 +896,8 @@ public class CmdExecutor implements CommandExecutor
 	
 	public List<Portal> getNearPortals(Location location)
 	{
-		List<Portal> near_portals = null;
+		//List<Portal> near_portals = null;
+		List<Portal> near_portals = new ArrayList<Portal>();
 		List<Portal> allPortals = getAllPortals();
 		List<Location> portal_locations = new ArrayList<Location>();
 		List<Location> near_portal_locations = new ArrayList<Location>();
@@ -963,7 +919,7 @@ public class CmdExecutor implements CommandExecutor
 		int player_y = pb.getY();
 		int player_z = pb.getZ();
 		
-		multinether.getLogger().log(Level.INFO, "block: "+player_x+" "+player_y+" "+player_z);
+		multinether.getLogger().log(Level.INFO, "block: {0} {1} {2}", new Object[]{player_x, player_y, player_z});
 		
 		int min_x = player_x - 10;
 		int max_x = player_x + 10;
@@ -989,7 +945,7 @@ public class CmdExecutor implements CommandExecutor
 		int min_z = player_z - 10;
 		int max_z = player_z + 10;
 		
-		multinether.getLogger().log(Level.INFO, "min_x: "+min_x+" max_x: "+max_x);
+		multinether.getLogger().log(Level.INFO, "min_x: {0} max_x: {1}", new Object[]{min_x, max_x});
 		
 		for ( int x = min_x; x < max_x; x++ )
 		{
@@ -1013,7 +969,7 @@ public class CmdExecutor implements CommandExecutor
 						int portal_loc_z = portal_loc_block.getZ();
 						if ( current_block.getX() == portal_loc_x && current_block.getY() == portal_loc_y && current_block.getZ() == portal_loc_z )
 						{
-							multinether.getLogger().log(Level.INFO, "location added: "+portal_locations.get(i));
+							multinether.getLogger().log(Level.INFO, "location added: {0}", portal_locations.get(i));
 							near_portal_locations.add(portal_locations.get(i));
 						}
 					}
@@ -1030,14 +986,14 @@ public class CmdExecutor implements CommandExecutor
 				int lx = current_loc.getBlock().getX();
 				int ly = current_loc.getBlock().getY();
 				int lz = current_loc.getBlock().getZ();
-				multinether.getLogger().log(Level.INFO, "lx: "+lx+" ly:"+ly+" lz: "+lz);
+				multinether.getLogger().log(Level.INFO, "lx: {0} ly:{1} lz: {2}", new Object[]{lx, ly, lz});
 				for ( int j = 0; j < allPortals.size(); j++ )
 				{
 					Portal current_portal = allPortals.get(j);
 					int px = current_portal.getX();
 					int py = current_portal.getY();
 					int pz = current_portal.getZ();
-					multinether.getLogger().log(Level.INFO, "px: "+px+" py: "+py+" pz: "+pz);
+					multinether.getLogger().log(Level.INFO, "px: {0} py: {1} pz: {2}", new Object[]{px, py, pz});
 					if ( lx == px && ly == py && lz == pz )
 					{
 						near_portals.add(current_portal);
@@ -1057,7 +1013,11 @@ public class CmdExecutor implements CommandExecutor
 		List<Location> portal_locations = new ArrayList<Location>();
 		Map<Location, Portal> locs_ports = new HashMap<Location, Portal>();
 		Portal portal = null ;
-		if ( near_portals.size() == 1 )
+		if ( near_portals.isEmpty() )
+		{
+			multinether.getLogger().log(Level.INFO, "no portals found");
+		}
+		else if ( near_portals.size() == 1 )
 		{
 			portal = near_portals.get(0);
 		}
@@ -1074,9 +1034,9 @@ public class CmdExecutor implements CommandExecutor
 				portal_locations.add(p_loc);
 				locs_ports.put(p_loc, current_portal);
 				
-				multinether.getLogger().log(Level.INFO, "portal x = "+x);
-				multinether.getLogger().log(Level.INFO, "portal y = "+y);
-				multinether.getLogger().log(Level.INFO, "portal z = "+z);
+				multinether.getLogger().log(Level.INFO, "portal x = {0}", x);
+				multinether.getLogger().log(Level.INFO, "portal y = {0}", y);
+				multinether.getLogger().log(Level.INFO, "portal z = {0}", z);
 			}
 			int l_x = location.getBlock().getX();
 			int l_y = location.getBlock().getY();
@@ -1115,13 +1075,13 @@ public class CmdExecutor implements CommandExecutor
 					next_y_diff = getDiff(next_y, l_y);
 					next_z_diff = getDiff(next_z, l_z);
 					
-					multinether.getLogger().log(Level.INFO, "x_diff = "+x_diff);
-					multinether.getLogger().log(Level.INFO, "y_diff = "+y_diff);
-					multinether.getLogger().log(Level.INFO, "z_diff = "+z_diff);
+					multinether.getLogger().log(Level.INFO, "x_diff = {0}", x_diff);
+					multinether.getLogger().log(Level.INFO, "y_diff = {0}", y_diff);
+					multinether.getLogger().log(Level.INFO, "z_diff = {0}", z_diff);
 					
-					multinether.getLogger().log(Level.INFO, "next_x_diff = "+next_x_diff);
-					multinether.getLogger().log(Level.INFO, "next_y_diff = "+next_y_diff);
-					multinether.getLogger().log(Level.INFO, "next_z_diff = "+next_z_diff);
+					multinether.getLogger().log(Level.INFO, "next_x_diff = {0}", next_x_diff);
+					multinether.getLogger().log(Level.INFO, "next_y_diff = {0}", next_y_diff);
+					multinether.getLogger().log(Level.INFO, "next_z_diff = {0}", next_z_diff);
 					
 					if ( next_x_diff <= x_diff && next_y_diff <= y_diff && next_z_diff <= z_diff )
 					{
@@ -1162,15 +1122,15 @@ public class CmdExecutor implements CommandExecutor
 						}
 						multinether.getLogger().log(Level.INFO, "current");
 					}
-					multinether.getLogger().log(Level.INFO, "final_x: "+final_x);
-					multinether.getLogger().log(Level.INFO, "final_y: "+final_y);
-					multinether.getLogger().log(Level.INFO, "final_z: "+final_z);
+					multinether.getLogger().log(Level.INFO, "final_x: {0}", final_x);
+					multinether.getLogger().log(Level.INFO, "final_y: {0}", final_y);
+					multinether.getLogger().log(Level.INFO, "final_z: {0}", final_z);
 				}
 			}
 			
-			multinether.getLogger().log(Level.INFO, "final_x: "+final_x);
-			multinether.getLogger().log(Level.INFO, "final_y: "+final_y);
-			multinether.getLogger().log(Level.INFO, "final_z: "+final_z);
+			multinether.getLogger().log(Level.INFO, "final_x: {0}", final_x);
+			multinether.getLogger().log(Level.INFO, "final_y: {0}", final_y);
+			multinether.getLogger().log(Level.INFO, "final_z: {0}", final_z);
 			Location final_loc = new Location(Bukkit.getWorld(world), final_x, final_y, final_z);
 			portal = locs_ports.get(final_loc);
 		}
@@ -1288,7 +1248,7 @@ public class CmdExecutor implements CommandExecutor
 			Integer p_y = location_section.getInt("y");
 			Integer p_z = location_section.getInt("z");
 			String p_world = location_section.getString("world");
-			multinether.getLogger().log(Level.INFO, "world = "+p_world);
+			multinether.getLogger().log(Level.INFO, "world = {0}", p_world);
 			String p_link = portal_section.getString("linkto");
 			Portal current_portal = new Portal();
 			current_portal.setID(current_id);
@@ -1415,7 +1375,7 @@ public class CmdExecutor implements CommandExecutor
 			}
 		}
 		
-		multinether.getLogger().log(Level.INFO, "pb size = "+portalblocks.size());
+		multinether.getLogger().log(Level.INFO, "pb size = {0}", portalblocks.size());
 		//pl.getBlock().setType(Material.PORTAL);
 		
 		for ( int i = 0; i < portalblocks.size(); i++ )
