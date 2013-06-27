@@ -751,7 +751,11 @@ public class CmdExecutor implements CommandExecutor
 		int y = loc_block.getY();
 		int x = loc_block.getX();
 		int z = loc_block.getZ();
-		
+		multinether.getLogger().log(Level.INFO, "rev-portal pos: x={0} y={1} z={2}", new Object[]{x, y, z});
+		if ( !(loc_block.getChunk().isLoaded()) )
+		{
+			loc_block.getChunk().load();
+		}
 		loc_block.setType(Material.GLOWSTONE);
 		new Location(loc.getWorld(), (x-1), y, z).getBlock().setType(Material.GLOWSTONE);
 		new Location(loc.getWorld(), (x-1), (y+1), z).getBlock().setType(Material.GLOWSTONE);
@@ -772,7 +776,6 @@ public class CmdExecutor implements CommandExecutor
 		frame_blocks.add(new Location(loc.getWorld(), (x-2), (y-1), z));
 		frame_blocks.add(new Location(loc.getWorld(), (x+1), (y-1), z));
 		
-		frame_blocks.add(new Location(loc.getWorld(), (x-1), y, z));
 		frame_blocks.add(new Location(loc.getWorld(), (x-2), y, z));
 		frame_blocks.add(new Location(loc.getWorld(), (x+1), y, z));
 		
@@ -797,6 +800,39 @@ public class CmdExecutor implements CommandExecutor
 		{
 			frame_blocks.get(i).getBlock().setType(Material.OBSIDIAN);
 		}
+		
+		List<Block> surrounding_blocks = new ArrayList<Block>();
+		surrounding_blocks.add(new Location(loc.getWorld(), x, y, (z+1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), y, (z+1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+1), (z+1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+1), (z+1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+2), (z+1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+2), (z+1)).getBlock());
+		
+		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+3), (z+1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+3), (z+1)).getBlock());
+		
+		surrounding_blocks.add(new Location(loc.getWorld(), x, y, (z-1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), y, (z-1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+1), (z-1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+1), (z-1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+2), (z-1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+2), (z-1)).getBlock());
+		
+		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+3), (z-1)).getBlock());
+		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+3), (z-1)).getBlock());
+		
+		for ( int j = 0; j < surrounding_blocks.size(); j++ )
+		{
+			surrounding_blocks.get(j).setType(Material.GLOWSTONE);
+		}
+		
+		for ( int j = 0; j < surrounding_blocks.size(); j++ )
+		{
+			surrounding_blocks.get(j).setType(Material.AIR);
+		}
+		
+		//TODO: portal öffnen
 	}
 	
 	public boolean savePortal(Portal p)
