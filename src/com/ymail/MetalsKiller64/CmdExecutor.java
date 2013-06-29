@@ -671,6 +671,9 @@ public class CmdExecutor implements CommandExecutor
 				boolean saved = savePortal(p);
 				if ( saved )
 				{
+					Location reverse_location = new Location(Bukkit.getWorld(p.getLinkTo()), location.getX(), location.getY(), location.getZ());
+					Location reverse_portal_location = getSafeLocation(reverse_location);
+					Portal reverse_portal = createReversePortal(reverse_portal_location, p.getLinkTo());
 					sender.sendMessage("Portal erstellt und gespeichert.");
 				}
 			}
@@ -1573,13 +1576,14 @@ public class CmdExecutor implements CommandExecutor
 	
 	public void openPortal(Portal p, Player player)
 	{
+		multinether.getLogger().log(Level.INFO, ">>> openPortal <<<");
 		int x = p.getX();
 		int y = p.getY();
 		int z = p.getZ();
 		String world = p.getWorld();
-		z = z-1; //FIXME: coordinate wird falsch gespeichert
-		x = x-1;
-		Location pl = new Location(Bukkit.getWorld(world), x, y, z);
+		//z = z-1; //FIXME: coordinate wird falsch gespeichert, oder doch nicht?? scheint manchmal zu funktionieren aber manchmal auch nicht
+		//x = x-1;
+		Location portal_location = new Location(Bukkit.getWorld(world), x, y, z);
 		Location x_minus_1 = new Location(Bukkit.getWorld(world), (x-1), y, z);
 		Location x_minus_2 = new Location(Bukkit.getWorld(world), (x-2), y, z);
 		Location x_plus_1 = new Location(Bukkit.getWorld(world), (x+1), y, z);
@@ -1589,9 +1593,16 @@ public class CmdExecutor implements CommandExecutor
 		Location z_plus_1 = new Location(Bukkit.getWorld(world), x, y, (z+1));
 		Location z_plus_2 = new Location(Bukkit.getWorld(world), x, y, (z+2));
 		List<Block> portalblocks = new ArrayList<Block>();
-		if ( x_minus_1.getBlock().getType().equals(Material.AIR) && !(x_minus_2.getBlock().getType().equals(Material.AIR)) && !(x_plus_1.getBlock().getType().equals(Material.AIR)) )
+		
+		if ( !(portal_location.getBlock().getType().equals(Material.AIR)) )
 		{
-			portalblocks.add(pl.getBlock());
+			player.sendMessage("Could not open portal, it seems to be broken.");
+			return;
+		}
+		
+		if ( x_minus_1.getBlock().getType().equals(Material.AIR) && x_minus_2.getBlock().getType().equals(Material.OBSIDIAN) && x_plus_1.getBlock().getType().equals(Material.OBSIDIAN) )
+		{
+			portalblocks.add(portal_location.getBlock());
 			portalblocks.add(x_minus_1.getBlock());
 			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
 			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
@@ -1605,14 +1616,14 @@ public class CmdExecutor implements CommandExecutor
 				{
 					portalblocks.add(y_plus_1_x_minus_1.getBlock());
 					portalblocks.add(y_plus_2_x_minus_1.getBlock());
-					multinether.getLogger().log(Level.INFO, "portal on x axis (1)");
+					multinether.getLogger().log(Level.INFO, "portal north-south (1)");
 				}
 			}
 		}
-		else if ( !(x_minus_1.getBlock().getType().equals(Material.AIR)) && x_plus_1.getBlock().getType().equals(Material.AIR) && !(x_plus_2.getBlock().getType().equals(Material.AIR)) )
+		else if ( x_minus_1.getBlock().getType().equals(Material.OBSIDIAN) && x_plus_1.getBlock().getType().equals(Material.AIR) && x_plus_2.getBlock().getType().equals(Material.OBSIDIAN) )
 		{
 			//FIXME: if-bedingung ändern
-			portalblocks.add(pl.getBlock());
+			portalblocks.add(portal_location.getBlock());
 			portalblocks.add(x_plus_1.getBlock());
 			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
 			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
@@ -1626,13 +1637,13 @@ public class CmdExecutor implements CommandExecutor
 				{
 					portalblocks.add(y_plus_1_x_plus_1.getBlock());
 					portalblocks.add(y_plus_2_x_plus_1.getBlock());
-					multinether.getLogger().log(Level.INFO, "portal on x axis (2)");
+					multinether.getLogger().log(Level.INFO, "portal north-south (2)");
 				}
 			}
 		}
-		else if ( z_minus_1.getBlock().getType().equals(Material.AIR) && !(z_minus_2.getBlock().getType().equals(Material.AIR)) && !(z_plus_1.getBlock().getType().equals(Material.AIR)) )
+		else if ( z_minus_1.getBlock().getType().equals(Material.AIR) && z_minus_2.getBlock().getType().equals(Material.OBSIDIAN) && z_plus_1.getBlock().getType().equals(Material.OBSIDIAN) )
 		{
-			portalblocks.add(pl.getBlock());
+			portalblocks.add(portal_location.getBlock());
 			portalblocks.add(z_minus_1.getBlock());
 			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
 			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
@@ -1646,13 +1657,13 @@ public class CmdExecutor implements CommandExecutor
 				{
 					portalblocks.add(y_plus_1_z_minus_1.getBlock());
 					portalblocks.add(y_plus_2_z_minus_1.getBlock());
-					multinether.getLogger().log(Level.INFO, "portal on z axis (1)");
+					multinether.getLogger().log(Level.INFO, "portal east-west (1)");
 				}
 			}
 		}
-		else if ( !(z_minus_1.getBlock().getType().equals(Material.AIR)) && z_plus_1.getBlock().getType().equals(Material.AIR) && !(z_plus_2.getBlock().getType().equals(Material.AIR)) )
+		else if ( z_minus_1.getBlock().getType().equals(Material.OBSIDIAN) && z_plus_1.getBlock().getType().equals(Material.AIR) && z_plus_2.getBlock().getType().equals(Material.OBSIDIAN) )
 		{
-			portalblocks.add(pl.getBlock());
+			portalblocks.add(portal_location.getBlock());
 			portalblocks.add(z_plus_1.getBlock());
 			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
 			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
@@ -1666,12 +1677,17 @@ public class CmdExecutor implements CommandExecutor
 				{
 					portalblocks.add(y_plus_1_z_plus_1.getBlock());
 					portalblocks.add(y_plus_2_z_plus_1.getBlock());
-					multinether.getLogger().log(Level.INFO, "portal on z axis (2)");
+					multinether.getLogger().log(Level.INFO, "portal east-west (2)");
 				}
 			}
 		}
 		
 		multinether.getLogger().log(Level.INFO, "pb size = {0}", portalblocks.size());
+		if ( portalblocks.isEmpty() )
+		{
+			player.sendMessage("Could not open portal, it seems to be broken.");
+			return;
+		}
 		//pl.getBlock().setType(Material.PORTAL);
 		
 		for ( int i = 0; i < portalblocks.size(); i++ )
@@ -1682,8 +1698,6 @@ public class CmdExecutor implements CommandExecutor
 		{
 			portalblocks.get(i).setType(Material.PORTAL);
 		}
-		createReversePortal(pl, p.getLinkTo());
-		
 		
 		//Block pb = pl.getBlock();
 		//if ( pb.getType().equals(Material.AIR) )

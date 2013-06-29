@@ -33,7 +33,6 @@ public final class MultiNether extends JavaPlugin
 		command_list.add("netherlink");
 		command_list.add("netherport");
 		command_list.add("functest");
-		//TODO: for-schleife über command_list
 		
 		 cmd = new CmdExecutor(this);
 		
@@ -45,7 +44,7 @@ public final class MultiNether extends JavaPlugin
 		this.reverse_portal_config = getReversePortalConfig();
 		savePortalConfig();
 		saveReversePortalConfig();
-		getConfig().options().copyDefaults(true); //FIXME: Defaults überschreiben??
+		getConfig().options().copyDefaults(true);
 		getConfig().set("LinkWorlds", true);
 		getConfig().set("PortalCount", 0);
 		saveConfig();
@@ -54,8 +53,6 @@ public final class MultiNether extends JavaPlugin
 		
 		//PluginManager pm = Bukkit.getServer().getPluginManager();
 		//pm.registerEvents(new NetherPortListener(), this);
-		//TODO: Befehl zum automatischen Erstellen eines Nethers zur angegebenen Welt mit passendem Seed
-		//TODO: Nether-Portale; zu jedem Portal auf der Oberwelt ein Portal im zugehörigen Nether generieren; in Verbindung mit Config
     }
     
     @Override
