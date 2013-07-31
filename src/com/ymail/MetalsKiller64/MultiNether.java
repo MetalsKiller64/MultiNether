@@ -30,16 +30,16 @@ public final class MultiNether extends JavaPlugin
     public void onEnable()
     {
 		command_list.add("rtp");
-		command_list.add("netherlink");
-		command_list.add("netherport");
-		command_list.add("functest");
+		command_list.add("mn-link");
+		command_list.add("mn");
 		
-		 cmd = new CmdExecutor(this);
+		cmd = new CmdExecutor(this);
 		
 		getCommand("rtp").setExecutor(new CmdExecutor(this));
-		getCommand("netherlink").setExecutor(new CmdExecutor(this));
-		getCommand("netherport").setExecutor(new CmdExecutor(this));
+		getCommand("mn-link").setExecutor(new CmdExecutor(this));
 		getCommand("cmdtest").setExecutor(new CmdExecutor(this));
+		getCommand("mn").setExecutor(new CmdExecutor(this));
+		
 		this.portal_config = getPortalConfig();
 		this.reverse_portal_config = getReversePortalConfig();
 		savePortalConfig();

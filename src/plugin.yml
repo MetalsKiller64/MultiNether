@@ -1,21 +1,20 @@
 name: MultiNether
 main: com.ymail.MetalsKiller64.MultiNether
-version: 0.5
-description: MultiNether Test
+version: 0.7
+author: MetalsKiller64
+description: MultiNether
 commands:
   rtp:
     description: Teleportation
     usage: /<command> [x] [y] [z] [welt] [player]
-  netherlink:
+  mn-link:
     description: Verlinke Welt mit Nether
-    usage: /<command> [show|add|remove|modify]
-    permission: MultiNether.netherlink
+    usage: /<command> [show|add|remove]
+    permission: MultiNether.link
     permission-message: Keine Berechtigung!
-  netherport:
-    description: Portale zum verlinkten Nether erstellen
-    usage: /<command> [create|delete]
-    permission: MultiNether.netherport
-    permission-message: Keine Berechtigung!
+  mn:
+    description: Open or close a portal
+    usage: /<command> [create|open|close] [id]
   cmdtest:
     description: Test-Command
     usage: /<command>

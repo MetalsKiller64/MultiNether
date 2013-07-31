@@ -15,6 +15,8 @@ public class Portal
 	private Integer _id;
 	private Integer _width;
 	private Integer _height;
+	private Integer _corresponding_id;
+	//TODO: ausrichtung speichern
     
     public Portal()
     {
@@ -66,6 +68,10 @@ public class Portal
 	{
 		this._height = height;
 	}
+	public void setCorrespondingID(Integer id)
+	{
+		this._corresponding_id = id;
+	}
 	
 	//Getter
     public Location getLocation()
@@ -111,5 +117,9 @@ public class Portal
 	public Integer getHeight()
 	{
 		return this._height;
+	}
+	public Integer getCorrespondingID()
+	{
+		return this._corresponding_id;
 	}
 }
