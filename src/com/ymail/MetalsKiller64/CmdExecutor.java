@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.lang.Math;
 import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
@@ -232,6 +233,7 @@ public class CmdExecutor implements CommandExecutor
 		{
 			if ( args.length > 0 )
 			{
+				/*
 				if ( args[0].equals("create") )
 				{
 					try
@@ -300,6 +302,7 @@ public class CmdExecutor implements CommandExecutor
 					sender.sendMessage("not yet implemented!");
 					return true;
 				}
+				*/
 			}
 		}
 		else if ( cmd.getName().equals("cmdtest") )
@@ -581,12 +584,7 @@ public class CmdExecutor implements CommandExecutor
 		return world;
 	}
 	
-	/**
-	 * Erstellen eines neuen Portals.
-	 * @param sender Der Sender des Befehls.
-	 * @return Gibt das neuerstellte Portalobjekt zurück.
-	 * @throws ClassCastException - wenn der Sender kein Spieler ist (!(instanceof Player))
-	 */
+	/*
 	public Portal createPortal(CommandSender sender)
 	{
 		MultiNether mn = multinether;
@@ -669,6 +667,7 @@ public class CmdExecutor implements CommandExecutor
 		}
 		return p;
 	}
+	*/
 	
 	public Portal createPortal(List<Block> portalBlocks)
 	{
@@ -700,65 +699,58 @@ public class CmdExecutor implements CommandExecutor
 		
 		String linkworld = getLinkWorld(portalBlocks.get(0).getWorld().getName());
 		
-		logger.log(Level.INFO, ""+portalBlocks.size());
+		Location portal_location = null;
 		for ( int i = 0; i < portalBlocks.size(); i++ )
 		{
+			logger.log(Level.INFO, "i = {0}", i);
 			Block current_block = portalBlocks.get(i);
 			logger.log(Level.INFO, current_block.getType().name());
-			/*
-			if ( current_block.getType().equals(Material.PORTAL) )
+			if ( current_block.getType().equals(Material.FIRE) )
 			{
-				Location block_location = current_block.getLocation();
-				block_location.setY(block_location.getY()-1);
-				//if (block_location.getBlock().getType().equals(Material.OBSIDIAN))
-				//{
-				logger.log(Level.INFO, block_location.getBlock().getX()+", "+block_location.getBlock().getY()+", "+block_location.getBlock().getZ());
-					
-				//}
+				//z-1?
+				portal_location = current_block.getLocation();
+				portal_location.setZ(portal_location.getZ() + 1);
+				break;
 			}
-			*/
-			return p;
 		}
 		
-		
-		/*
 		if ( !(linkworld.isEmpty()) )
 		{
-			Double x = location.getX();
-			Double y = location.getY();
-			Double z = location.getZ();
+			Double x = portal_location.getX();
+			Double y = portal_location.getY();
+			Double z = portal_location.getZ();
 			Integer p_x = x.intValue();
 			Integer p_y = y.intValue();
 			Integer p_z = z.intValue();
 
 			p = new Portal();
-			p.setLocation(location);
+			p.setLocation(portal_location);
 			p.setLinkTo(linkworld);
-			p.setWorld(location.getWorld().getName());
+			p.setWorld(portal_location.getWorld().getName());
 			p.setID(id);
-			mn.getLogger().log(Level.INFO, "x = "+p_x);
-			mn.getLogger().log(Level.INFO, "y = "+p_y);
-			mn.getLogger().log(Level.INFO, "z = "+p_z);
 			p.setX(p_x);
 			p.setY(p_y);
 			p.setZ(p_z);
 
 			boolean saved = savePortal(p);
+			logger.log(Level.INFO, "saved ({0})", saved);
 			if ( saved )
 			{
-				Location reverse_location = new Location(Bukkit.getWorld(p.getLinkTo()), location.getX(), location.getY(), location.getZ());
+				Location reverse_location = new Location(Bukkit.getWorld(p.getLinkTo()), portal_location.getX(), portal_location.getY(), portal_location.getZ());
 				Object[] reverse_result = getReverseLocation(reverse_location);
 				Location reverse_portal_location = (Location)reverse_result[0];
 				int is_safe = (Integer)reverse_result[1];
 				Portal reverse_portal = createReversePortal(reverse_portal_location, p.getWorld(), p.getID(), is_safe);
-				sender.sendMessage("Portal erstellt und gespeichert.");
+			}
+			else
+			{
+				p = null;
 			}
 		}
 		else
 		{
-			sender.sendMessage("Kein Link vorhanden.");
+			logger.log(Level.INFO, "linkworld is empty");
 		}
-		*/
 
 		return p;
 	}

@@ -21,13 +21,13 @@ public class NetherPortListener implements Listener
 {
 	private MultiNether multinether;
 	private CmdExecutor cmd;
-	private Logger log;
+	private Logger logger;
 	public NetherPortListener(MultiNether plugin)
 	{
 		this.multinether = plugin;
 		multinether.getServer().getPluginManager().registerEvents(this, plugin);
 		this.cmd = plugin.cmd;
-		this.log = multinether.getLogger();
+		this.logger = multinether.getLogger();
 	}
 	
 	@EventHandler
@@ -39,7 +39,7 @@ public class NetherPortListener implements Listener
 		boolean is_nether;
 		
 		String entrance_world = player_location.getWorld().getName();
-		log.log(Level.INFO, "entrance_world: {0}", entrance_world);
+		logger.log(Level.INFO, "entrance_world: {0}", entrance_world);
 		
 		ConfigurationSection netherlinks = multinether.getConfig().getConfigurationSection("NetherLinks");
 		Set<String> netherlink_keys = netherlinks.getKeys(true);
@@ -75,7 +75,7 @@ public class NetherPortListener implements Listener
 			reverse_id = entrance_portal.getCorrespondingID();
 		}
 		
-		log.log(Level.INFO, "is nether: "+is_nether);
+		logger.log(Level.INFO, "is nether: "+is_nether);
 		/*
 		Integer link_portal_id = 0;
 		if ( is_nether )
@@ -90,8 +90,8 @@ public class NetherPortListener implements Listener
 		}
 		*/
 		
-		log.log(Level.INFO, "linkt_to: {0}", link_to);
-		log.log(Level.INFO, "reverse id: {0}", reverse_id);
+		logger.log(Level.INFO, "linkt_to: {0}", link_to);
+		logger.log(Level.INFO, "reverse id: {0}", reverse_id);
 		
 		Portal reverse_portal = null;
 		
@@ -137,15 +137,15 @@ public class NetherPortListener implements Listener
 					z = z - 0.9;
 				}
 			}
-			log.log(Level.INFO, y.getClass().getName());
-			log.log(Level.INFO, "x: {0}", x);
-			log.log(Level.INFO, "y: {0}", y);
-			log.log(Level.INFO, "z: {0}", z);
+			logger.log(Level.INFO, y.getClass().getName());
+			logger.log(Level.INFO, "x: {0}", x);
+			logger.log(Level.INFO, "y: {0}", y);
+			logger.log(Level.INFO, "z: {0}", z);
 			player.teleport(new Location(Bukkit.getWorld(reverse_portal.getWorld()), x, y, z));
 		}
 		else
 		{
-			log.log(Level.SEVERE, "bug: portal is null");
+			logger.log(Level.SEVERE, "bug: portal is null");
 		}
 		/*
 		player.sendMessage("PlayerPortalEvent");
@@ -222,7 +222,15 @@ public class NetherPortListener implements Listener
 		//TODO: prüfen ob schon ein link vorhanden ist, wenn nicht einen neuen anlegen
 		//TODO: Speichern des Portals hierher verlegen (wird bisher durch einen Befehl im CmdExecutor erledigt)
 		//TODO: wenn noch kein Nether vorhanden ist, einen neuen mit dem Namen und dem Seed der Oberwelt anlegen (wie in Multiverse, z.B.: Welt_nether)
-		log.log(Level.INFO, "PortalCreateEvent");
-		cmd.createPortal(pce.getBlocks());
+		Portal portal = cmd.createPortal(pce.getBlocks());
+		if ( portal != null )
+		{
+			logger.log(Level.INFO, "Portal successfully created");
+			logger.log(Level.INFO, "id: {0}", portal.getID());
+		}
+		else
+		{
+			logger.log(Level.SEVERE, "Failed to create portal");
+		}
 	}
 }
