@@ -26,6 +26,7 @@ import org.bukkit.entity.Player;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.utils.WorldManager;
+import org.bukkit.util.Vector;
 
 //import java.util.Arrays;
 //import java.util.logging.Logger;
@@ -307,7 +308,20 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else if ( cmd.getName().equals("cmdtest") )
 		{
-			return true;
+			if ( sender instanceof Player )
+			{
+				Player p = (Player)sender;
+				Portal portal = getNearestPortal(p.getLocation());
+				if ( portal == null )
+				{
+					sender.sendMessage("kein portal in der nähe");
+				}
+				else
+				{
+					sender.sendMessage("Portal gefunden, id: "+portal.getID());
+				}
+				return true;
+			}
 		}
 		return false;
 	}
@@ -671,29 +685,25 @@ public class CmdExecutor implements CommandExecutor
 	
 	public Portal createPortal(List<Block> portalBlocks)
 	{
-		MultiNether mn = multinether;
 		Portal p = null;
 		Integer id = 0;
 		List<Integer> portal_ids = getAllPortalIDs();
 		if ( !(portal_ids.isEmpty()) )
 		{
-			//List<Integer> ids = getAllPortalIDs();
 			for ( int i = 0; i < portal_ids.size(); i++ )
 			{
 				if ( !(portal_ids.contains(i)) )
 				{
-					//sender.sendMessage(""+i);
 					Portal check_p = getPortal(i);
 					if ( check_p == null )
 					{
 						id = i;
 					}
-					//sender.sendMessage("id = "+i);
 				}
 			}
 			if ( id == 0 )
 			{
-				id = getAllPortalIDs().size();
+				id = portal_ids.size();
 			}
 		}
 		
@@ -754,8 +764,7 @@ public class CmdExecutor implements CommandExecutor
 
 		return p;
 	}
-	
-	
+
 	public Portal createReversePortal(Location loc, String world, Integer link_portal_id, Integer is_safe)
 	{
 		Portal p = new Portal();
@@ -806,6 +815,7 @@ public class CmdExecutor implements CommandExecutor
 	public void buildPortalFrame(Location loc, Integer is_safe)
 	{
 		//TODO: portal ausrichtung
+		logger.log(Level.INFO, "baue portal-rahmen bei {0}...", loc.toString());
 		Block loc_block = loc.getBlock();
 		int y = loc_block.getY();
 		int x = loc_block.getX();
@@ -1223,8 +1233,7 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else
 		{
-			//no portals found
-			return near_portals;
+			
 		}
 		
 		Block pb = location.getBlock();
@@ -1310,14 +1319,192 @@ public class CmdExecutor implements CommandExecutor
 		return near_portals;
 	}
 	
+	public List<Location> getPortalsNearLocation(Location location)
+	{
+		//TODO: suchalgorithmus ändern, sodass in einem radius um die location herum gesucht wird (beginnend im zentrum)
+		logger.log(Level.INFO, "suche nach portalen bei {0}...", location.toString());
+		//List<Portal> near_portals = null;
+		List<Portal> near_portals = new ArrayList<Portal>();
+		List<Location> portal_locations = new ArrayList<Location>();
+		
+		Block pb = location.getBlock();
+		
+		int player_x = pb.getX();
+		int player_y = pb.getY();
+		int player_z = pb.getZ();
+		
+		int min_x = player_x - 10;
+		int max_x = player_x + 10;
+		
+		int min_y;
+		int max_y;
+		if ( player_y < 25 )
+		{
+			min_y = 0;
+			max_y = player_y + 25;
+		}
+		else if ( player_y > 245 )
+		{
+			min_y = player_y - 25;
+			max_y = 255;
+		}
+		else
+		{
+			min_y = player_y - 25;
+			max_y = player_y + 25;
+		}
+		
+		int min_z = player_z - 10;
+		int max_z = player_z + 10;
+		
+		for ( int x = min_x; x < max_x; x++ )
+		{
+			for ( int y = min_y; y < max_y; y++ )
+			{
+				for ( int z = min_z; z < max_z; z++ )
+				{
+					Block current_block = location.getWorld().getBlockAt(x, y, z);
+					Location current_block_loc = current_block.getLocation();
+					Location above_current_block = current_block_loc;
+					above_current_block.setY(y+1);
+					Location below_current_block = current_block_loc;
+					below_current_block.setY(y-1);
+					
+					if ( current_block.getType().equals(Material.OBSIDIAN) )
+					{
+						/*
+						logger.log(Level.INFO, "current_block: {0}, {1}, {2}", new Object[]{x, y, z});
+						logger.log(Level.INFO, "block type: {0}", current_block.getType().toString());
+						logger.log(Level.INFO, "above is: {0}", above_current_block.getBlock().getType().toString());
+						*/
+						if ( above_current_block.getBlock().getType().equals(Material.PORTAL) )
+						{
+							logger.log(Level.INFO, "portal gefunden bei {0}, {1}, {2}", new Object[]{x, y, z});
+							portal_locations.add(current_block.getLocation());
+						}
+					}
+					else if ( current_block.getType().equals(Material.PORTAL) )
+					{
+						/*
+						logger.log(Level.INFO, "current_block: {0}, {1}, {2}", new Object[]{x, y, z});
+						logger.log(Level.INFO, "block type: {0}", current_block.getType().toString());
+						logger.log(Level.INFO, "below is: {0}", below_current_block.getBlock().getType().toString());
+						*/
+						if ( below_current_block.getBlock().getType().equals(Material.OBSIDIAN) )
+						{
+							logger.log(Level.INFO, "portal gefunden bei {0}, {1}, {2}", new Object[]{x, y, z});
+							portal_locations.add(current_block.getLocation());
+						}
+					}
+				}
+			}
+		}
+		
+		return portal_locations;
+	}
+	
+	public Location get_NearestPortal(Location location)
+	{
+		//List<Location> near_portals = getPortalsNearLocation(location);
+		String world = location.getWorld().getName();
+		List<Location> portal_locations = getPortalsNearLocation(location);
+		Location portal_location = null;
+		if ( portal_locations.isEmpty() )
+		{
+			//no portals found
+			logger.log(Level.INFO, "keine portale gefunden");
+			return portal_location;
+		}
+		else if ( portal_locations.size() == 1 )
+		{
+			portal_location = portal_locations.get(0);
+		}
+		else
+		{
+			logger.log(Level.INFO, "{0} portale gefunden", portal_locations.size());
+			int l_x = location.getBlock().getX();
+			int l_y = location.getBlock().getY();
+			int l_z = location.getBlock().getZ();
+			
+			int final_x = 0;
+			int final_y = 0;
+			int final_z = 0;
+			
+			for ( int j = 0; j < portal_locations.size(); j++ )
+			{
+				Location c_loc = portal_locations.get(j);
+				int x = c_loc.getBlock().getX();
+				int y = c_loc.getBlock().getY();
+				int z = c_loc.getBlock().getZ();
+				
+				int x_diff = getDiff(x, l_x);
+				int y_diff = getDiff(y, l_y);
+				int z_diff = getDiff(z, l_z);
+				
+				if ( j != portal_locations.size()-1 )
+				{
+					Location next_loc = portal_locations.get(j+1);
+					int next_x = next_loc.getBlock().getX();
+					int next_y = next_loc.getBlock().getY();
+					int next_z = next_loc.getBlock().getZ();
+					
+					int next_x_diff = getDiff(next_x, l_x);
+					int next_y_diff = getDiff(next_y, l_y);
+					int next_z_diff = getDiff(next_z, l_z);
+					
+					if ( next_x_diff <= x_diff && next_y_diff <= y_diff && next_z_diff <= z_diff )
+					{
+						final_x = next_x;
+						final_y = next_y;
+						final_z = next_z;
+						
+						if ( l_x < 0 && final_x > 0 )
+						{
+							final_x *= -1;
+						}
+						if ( l_y < 0 && final_y > 0 )
+						{
+							final_y *= -1;
+						}
+						if ( l_z < 0 && final_z > 0 )
+						{
+							final_z *= -1;
+						}
+					}
+					else
+					{
+						final_x = x;
+						final_y = y;
+						final_z = z;
+						if ( l_x < 0 && final_x > 0 )
+						{
+							final_x *= -1;
+						}
+						if ( l_y < 0 && final_y > 0 )
+						{
+							final_y *= -1;
+						}
+						if ( l_z < 0 && final_z > 0 )
+						{
+							final_z *= -1;
+						}
+					}
+				}
+			}
+			
+			Location final_loc = new Location(Bukkit.getWorld(world), final_x, final_y, final_z);
+			portal_location = final_loc;
+		}
+		return portal_location;
+	}
+	
 	public Portal getNearestPortal(Location location)
 	{
-		//TODO: suche nach reverse portalen
 		List<Portal> near_portals = getNearPortals(location);
 		String world = location.getWorld().getName();
 		List<Location> portal_locations = new ArrayList<Location>();
 		Map<Location, Portal> locs_ports = new HashMap<Location, Portal>();
-		Portal portal = null ;
+		Portal portal = null;
 		if ( near_portals.isEmpty() )
 		{
 			//no portals found
@@ -1915,6 +2102,7 @@ public class CmdExecutor implements CommandExecutor
 		Bukkit.getWorlds().add(create_nether.createWorld());
 	}
 	
+	/*
 	public boolean openPortal(Portal p)
 	{
 		int x = p.getX();
@@ -2038,17 +2226,73 @@ public class CmdExecutor implements CommandExecutor
 		}
 		return true;
 	}
+	*/
+	
+	public Object[] getLocation(Location reverse_portal_location)
+	{
+		logger.log(Level.INFO, ">>> getLocation <<<");
+		Object[] result = new Object[2];
+		int is_safe = 0;
+		int x = reverse_portal_location.getBlock().getX() * 8;
+		int z = reverse_portal_location.getBlock().getZ() * 8;
+		int y = reverse_portal_location.getBlock().getY();
+		int y_min = y - 15;
+		
+		logger.log(Level.INFO, "y: {0}", y);
+		
+		/*Random random = new Random();
+		int y = random.nextInt(123 - 32) + 32;
+		reverse_portal_location.setY(y);
+		*/
+		
+		if ( reverse_portal_location.getBlock().getType().equals(Material.WATER) )
+		{
+			Location above = reverse_portal_location;
+			Location below = reverse_portal_location;
+			above.setY(y+1);
+			below.setY(y-1);
+			if ( !(above.getBlock().getType().equals(Material.WATER)) && below.getBlock().getType().equals(Material.WATER) )
+			{
+				is_safe = -1;
+			}
+			if ( above.getBlock().getType().equals(Material.WATER) && below.getBlock().getType().equals(Material.WATER) )
+			{
+				is_safe = 1;
+			}
+		}
+		else if ( reverse_portal_location.getBlock().getType().equals(Material.AIR) )
+		{
+			for ( int i = y; i > y_min; i-- )
+			{
+				Location l = reverse_portal_location;
+				l.setY(i-1);
+				if ( !(l.getBlock().getType().equals(Material.AIR)) )
+				{
+					is_safe = 0;
+					reverse_portal_location.setY(i);
+				}
+			}
+		}
+		result[0] = reverse_portal_location;
+		result[1] = is_safe;
+		logger.log(Level.INFO, "location = {0}", result[0]);
+		return result;
+	}
 	
 	public Object[] getReverseLocation(Location portal_location)
 	{
 		Object[] result = new Object[2];
 		int is_safe = 0;
-		int x = portal_location.getBlock().getX();
-		int z = portal_location.getBlock().getZ();
+		float x = portal_location.getBlock().getX() / 8;
+		float z = portal_location.getBlock().getZ() / 8;
 		
+		/*		
 		Random random = new Random();
-		int y = random.nextInt(123 - 32) + 32; //Y ist ein zufallswert zwischen 32 und 122 (von 0 bis 31 ist alles voller lava und 123 ist 5 blöcke unter der obergrenze)
+		int y = random.nextInt(y_max - y_min) + y_min; //Y ist ein zufallswert zwischen 32 und 122 (von 0 bis 31 ist alles voller lava und 123 ist 5 blöcke unter der obergrenze)
 		portal_location.setY(y);
+		*/
+		int y = portal_location.getBlockY();
+		int y_min = y-15;
 		
 		if ( portal_location.getBlock().getType().equals(Material.LAVA) ) //wenn die location trotzdem lava ist (z.B in einem lavafall)
 		{
@@ -2067,7 +2311,7 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else if ( portal_location.getBlock().getType().equals(Material.AIR) )
 		{
-			for ( int i = y; i > 32; i-- )
+			for ( int i = y; i > y_min; i-- )
 			{
 				Location l = portal_location;
 				l.setY(i-1);

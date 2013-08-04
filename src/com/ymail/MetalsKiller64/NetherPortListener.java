@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -36,11 +37,70 @@ public class NetherPortListener implements Listener
 		Player player = e.getPlayer();
 		Location player_location = player.getLocation();
 		
-		boolean is_nether;
+		boolean is_nether = player_location.getWorld().getEnvironment().equals(Environment.NETHER);
 		
 		String entrance_world = player_location.getWorld().getName();
-		logger.log(Level.INFO, "entrance_world: {0}", entrance_world);
+		List<World> worlds = Bukkit.getWorlds();
+		String nether_name = entrance_world+"_nether";
+		String overworld_name = entrance_world.split("_")[0];
 		
+		logger.log(Level.INFO, "entrance_world: {0}", entrance_world);
+		logger.log(Level.INFO, "nether_name: {0}", nether_name);
+		logger.log(Level.INFO, "overworld_name: {0}", overworld_name);
+		
+		World nether = null;
+		World overworld = null;
+		
+		if ( !(is_nether) )
+		{
+			for ( int h = 0; h < worlds.size(); h++ )
+			{
+				if ( worlds.get(h).getName().equalsIgnoreCase(nether_name) )
+				{
+					//nether vorhanden
+					nether = worlds.get(h);
+				}
+			}
+			if ( nether == null )
+			{
+				//kein nether vorhanden
+			}
+		}
+		else
+		{
+			for ( int i = 0; i < worlds.size(); i++ )
+			{
+				if ( worlds.get(i).getName().equalsIgnoreCase(overworld_name) )
+				{
+					overworld = worlds.get(i);
+				}
+			}
+			if ( overworld == null )
+			{
+				//fail
+			}
+		}
+		
+		Location player_location_on_other_world = player_location;
+		if ( is_nether )
+		{
+			player_location_on_other_world.setWorld(overworld);
+		}
+		else
+		{
+			player_location_on_other_world.setWorld(nether);
+		}
+		Location near_portal_location = cmd.get_NearestPortal(player_location_on_other_world);
+		logger.log(Level.INFO, player_location_on_other_world.toString());
+		if ( near_portal_location == null )
+		{
+			logger.log(Level.INFO, "fail, kein portal gefunden");
+		}
+		else
+		{
+			player.teleport(near_portal_location);
+		}
+		/*
 		ConfigurationSection netherlinks = multinether.getConfig().getConfigurationSection("NetherLinks");
 		Set<String> netherlink_keys = netherlinks.getKeys(true);
 		Object[] key_list = netherlink_keys.toArray();
@@ -53,7 +113,9 @@ public class NetherPortListener implements Listener
 		{
 			is_nether = true;
 		}
+		*/
 		
+		/*
 		Portal entrance_portal;
 		String link_to;
 		Integer reverse_id;
@@ -76,7 +138,6 @@ public class NetherPortListener implements Listener
 		}
 		
 		logger.log(Level.INFO, "is nether: "+is_nether);
-		/*
 		Integer link_portal_id = 0;
 		if ( is_nether )
 		{
@@ -90,6 +151,7 @@ public class NetherPortListener implements Listener
 		}
 		*/
 		
+		/*
 		logger.log(Level.INFO, "linkt_to: {0}", link_to);
 		logger.log(Level.INFO, "reverse id: {0}", reverse_id);
 		
@@ -113,7 +175,7 @@ public class NetherPortListener implements Listener
 			/*FIXME: teleportation vom nether funktioniert nur wenn dieser kein standard nether ist (z.B. World1_nether)
 			 * ansonsten wird das portal event nicht vom NetherPortListener übernommen
 			 * -> folge: man landet nicht auf der in der config eingetragenen welt sondern auf der standard welt (z.B. World1)
-			 */
+			 * /
 			double x = reverse_portal.getX();
 			Integer y = reverse_portal.getY();
 			double z = reverse_portal.getZ();
@@ -147,90 +209,112 @@ public class NetherPortListener implements Listener
 		{
 			logger.log(Level.SEVERE, "bug: portal is null");
 		}
-		/*
-		player.sendMessage("PlayerPortalEvent");
-		double x = player.getLocation().getBlock().getX();
-		double y = player.getLocation().getBlock().getY();
-		double z = player.getLocation().getBlock().getZ();
-		World world = player.getWorld();
-		
-		Location player_location = new Location(world, x, y, z);
-		if ( !(player_location.getBlock().getType().equals(Material.AIR)) )
-		{
-			player_location.getBlock().setType(Material.AIR);
-			Location pl2 = player_location;
-			pl2.setY(y+1);
-			pl2.getBlock().setType(Material.AIR);
-		}
-		log.log(Level.INFO, player_location.toString());
-		Portal p = cmd.getNearestPortal(player_location);
-		Location destination_location = new Location(Bukkit.getWorld(p.getLinkTo()), p.getX(), p.getY(), p.getZ());
-		String path = p.getID()+".linktoid";
-		String link_portal_id = "";
-		
-		ConfigurationSection netherlinks = multinether.getConfig().getConfigurationSection("NetherLinks");
-		Set<String> keys = netherlinks.getKeys(true);
-		Object[] key_list = keys.toArray();
-		boolean is_nether = false;
-		for ( int i = 0; i < key_list.length; i++ )
-		{
-			String key = (String)key_list[i];
-			String key_world = multinether.getConfig().getString("NetherLinks."+key);
-			if ( world.getName().equals(key) )
-			{
-				is_nether = false;
-			}
-			else if ( world.getName().equals(key_world) )
-			{
-				is_nether = true;
-			}
-			//log.log(Level.INFO, key_world);
-		}
-		//log.log(Level.INFO, "conf world: "+conf_world);
-		Portal dest_portal = null;
-		String link_world = "";
-		if ( !(is_nether) )
-		{
-			log.log(Level.INFO, "is not nether");
-			link_portal_id = multinether.getPortalConfig().getString(path);
-			log.log(Level.INFO, "link id: "+link_portal_id);
-			dest_portal = cmd.getReversePortal(Integer.parseInt(link_portal_id));
-		}
-		else
-		{
-			log.log(Level.INFO, "is nether");
-			link_portal_id = multinether.getReversePortalConfig().getString(path);
-			log.log(Level.INFO, "link id: "+link_portal_id);
-			dest_portal = cmd.getPortal(Integer.parseInt(link_portal_id));
-		}
-		link_world = dest_portal.getLinkTo();
-		
-		//multinether.getLogger().log(Level.INFO, path+": "+link_portal_id);
-		log.log(Level.INFO, "dest_portal y: "+dest_portal.getY().toString());
-		destination_location.setY(dest_portal.getY());
-		
-		//String linkworld = multinether.getConfig().getString("NetherLinks."+world.getName());
-		player.sendMessage(link_world);
-		log.log(Level.INFO, "teleport to coords: x={0} y={1} z={2} on world '"+link_world+"'", new Object[]{p.getX(), p.getY(), p.getZ()});
-		player.teleport(destination_location);
 		*/
 	}
 	
 	@EventHandler
 	public void onPortalCreate(PortalCreateEvent pce)
 	{
-		//TODO: prüfen ob schon ein link vorhanden ist, wenn nicht einen neuen anlegen
-		//TODO: Speichern des Portals hierher verlegen (wird bisher durch einen Befehl im CmdExecutor erledigt)
 		//TODO: wenn noch kein Nether vorhanden ist, einen neuen mit dem Namen und dem Seed der Oberwelt anlegen (wie in Multiverse, z.B.: Welt_nether)
-		Portal portal = cmd.createPortal(pce.getBlocks());
-		if ( portal != null )
+		
+		boolean is_nether = pce.getWorld().getEnvironment().equals(Environment.NETHER);
+		
+		String entrance_world = pce.getWorld().getName();
+		List<World> worlds = Bukkit.getWorlds();
+		String nether_name = entrance_world+"_nether";
+		String overworld_name = entrance_world.split("_")[0];
+		
+		logger.log(Level.INFO, "entrance_world: {0}", entrance_world);
+		logger.log(Level.INFO, "nether_name: {0}", nether_name);
+		logger.log(Level.INFO, "overworld_name: {0}", overworld_name);
+		
+		World nether = null;
+		World overworld = null;
+		
+		if ( !(is_nether) )
 		{
-			logger.log(Level.INFO, "Portal successfully created");
-			logger.log(Level.INFO, "id: {0}", portal.getID());
+			for ( int h = 0; h < worlds.size(); h++ )
+			{
+				if ( worlds.get(h).getName().equalsIgnoreCase(nether_name) )
+				{
+					//nether vorhanden
+					nether = worlds.get(h);
+				}
+			}
+			if ( nether == null )
+			{
+				//kein nether vorhanden
+			}
 		}
 		else
 		{
-			logger.log(Level.SEVERE, "Failed to create portal");
+			for ( int i = 0; i < worlds.size(); i++ )
+			{
+				if ( worlds.get(i).getName().equalsIgnoreCase(overworld_name) )
+				{
+					overworld = worlds.get(i);
+				}
+			}
+			if ( overworld == null )
+			{
+				//fail
+			}
+		}
+		
+		Location portal_location = null;
+		List<Block> portalBlocks = pce.getBlocks();
+		for ( int i = 0; i < portalBlocks.size(); i++ )
+		{
+			logger.log(Level.INFO, "i = {0}", i);
+			Block current_block = portalBlocks.get(i);
+			logger.log(Level.INFO, current_block.getType().name());
+			if ( current_block.getType().equals(Material.FIRE) )
+			{
+				//z-1?
+				portal_location = current_block.getLocation();
+				portal_location.setZ(portal_location.getZ() + 1);
+				break;
+			}
+		}
+		
+		logger.log(Level.INFO, "portal_location: {0}", portal_location.toString());
+		Location portal_location_on_other_world = portal_location;
+		if ( is_nether )
+		{
+			portal_location_on_other_world.setWorld(overworld);
+		}
+		else
+		{
+			portal_location_on_other_world.setWorld(nether);
+		}
+		
+		logger.log(Level.INFO, "portal_location_on_other_world: {0}", portal_location_on_other_world.toString());
+		Location near_portal_location = cmd.get_NearestPortal(portal_location_on_other_world);
+		
+		if ( near_portal_location == null )
+		{
+			logger.log(Level.INFO, "kein portal in der nähe");
+			Location new_portal_location = null;
+			Integer is_safe = 0;
+			if ( !(is_nether) )
+			{
+				Object[] result = cmd.getReverseLocation(portal_location_on_other_world);
+				new_portal_location = (Location)result[0];
+				is_safe = (Integer)result[1];
+			}
+			else
+			{
+				Object[] result = cmd.getLocation(portal_location_on_other_world);
+				new_portal_location = (Location)result[0];
+				is_safe = (Integer)result[1];
+			}
+			logger.log(Level.INFO, "new_portal_location: {0}" ,new_portal_location.toString());
+			cmd.buildPortalFrame(new_portal_location, is_safe);
+		}
+		else
+		{
+			logger.log(Level.INFO, "near_portal_location: {0}", near_portal_location.toString());
+			logger.log(Level.INFO, "Portal in der nähe");
 		}
 	}
 }
