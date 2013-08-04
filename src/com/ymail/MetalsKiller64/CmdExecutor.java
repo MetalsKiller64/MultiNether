@@ -806,13 +806,13 @@ public class CmdExecutor implements CommandExecutor
 		boolean saved = saveReversePortal(p, link_portal_id);
 		if ( saved )
 		{
-			buildPortalFrame(location, is_safe);
+			buildPortalFrame(location, is_safe, "");
 		}
 		
 		return p;
 	}
 	
-	public void buildPortalFrame(Location loc, Integer is_safe)
+	public void buildPortalFrame(Location loc, Integer is_safe, String orientation)
 	{
 		//TODO: portal ausrichtung
 		logger.log(Level.INFO, "baue portal-rahmen bei {0}...", loc.toString());
@@ -827,101 +827,159 @@ public class CmdExecutor implements CommandExecutor
 		
 		List<Location> portal_blocks = new ArrayList<Location>();
 		portal_blocks.add(loc);
-		portal_blocks.add(new Location(loc.getWorld(), (x-1), y, z));
-		portal_blocks.add(new Location(loc.getWorld(), (x-1), (y+1), z));
-		portal_blocks.add(new Location(loc.getWorld(), (x), (y+1), z));
-		portal_blocks.add(new Location(loc.getWorld(), x, (y+2), z));
-		portal_blocks.add(new Location(loc.getWorld(), (x-1), (y+2), z));
 		
-		for ( int h = 0; h < portal_blocks.size(); h++ )
+		if ( orientation.equals("X") )
 		{
-			portal_blocks.get(h).getBlock().setType(Material.GLOWSTONE);
+			portal_blocks.add(new Location(loc.getWorld(), (x-1), y, z));
+			portal_blocks.add(new Location(loc.getWorld(), (x-1), (y+1), z));
+			portal_blocks.add(new Location(loc.getWorld(), x, (y+1), z));
+			portal_blocks.add(new Location(loc.getWorld(), x, (y+2), z));
+			portal_blocks.add(new Location(loc.getWorld(), (x-1), (y+2), z));
+		}
+		else if ( orientation.equals("Z") )
+		{
+			portal_blocks.add(new Location(loc.getWorld(), x, y, (z-1)));
+			portal_blocks.add(new Location(loc.getWorld(), x, (y+1), (z-1)));
+			portal_blocks.add(new Location(loc.getWorld(), x, (y+1), z));
+			portal_blocks.add(new Location(loc.getWorld(), x, (y+2), z));
+			portal_blocks.add(new Location(loc.getWorld(), x, (y+2), (z-1)));
+		}
+
+		for ( int e = 0; e < portal_blocks.size(); e++ )
+		{
+			portal_blocks.get(e).getBlock().setType(Material.GLOWSTONE);
 		}
 		
-		for ( int h = 0; h < portal_blocks.size(); h++ )
+		for ( int f = 0; f < portal_blocks.size(); f++ )
 		{
-			portal_blocks.get(h).getBlock().setType(Material.AIR);
+			portal_blocks.get(f).getBlock().setType(Material.AIR);
 		}
 		
 		List<Location> frame_blocks = new ArrayList<Location>();
-		frame_blocks.add(new Location(loc.getWorld(), x, (y-1), z));
-		frame_blocks.add(new Location(loc.getWorld(), (x-1), (y-1), z));
-		frame_blocks.add(new Location(loc.getWorld(), (x-2), (y-1), z));
-		frame_blocks.add(new Location(loc.getWorld(), (x+1), (y-1), z));
 		
-		frame_blocks.add(new Location(loc.getWorld(), (x-2), y, z));
-		frame_blocks.add(new Location(loc.getWorld(), (x+1), y, z));
-		
-		frame_blocks.add(new Location(loc.getWorld(), (x-2), (y+1), z));
-		frame_blocks.add(new Location(loc.getWorld(), (x+1), (y+1), z));
-		
-		frame_blocks.add(new Location(loc.getWorld(), (x-2), (y+2), z));
-		frame_blocks.add(new Location(loc.getWorld(), (x+1), (y+2), z));
-		
-		frame_blocks.add(new Location(loc.getWorld(), (x-2), (y+3), z));
-		frame_blocks.add(new Location(loc.getWorld(), (x-1), (y+3), z));
-		frame_blocks.add(new Location(loc.getWorld(), x, (y+3), z));
-		frame_blocks.add(new Location(loc.getWorld(), (x+1), (y+3), z));
-		
-		
-		for ( int i = 0; i < frame_blocks.size(); i++ )
+		if ( orientation.equals("X") )
 		{
-			frame_blocks.get(i).getBlock().setType(Material.GLOWSTONE);
+			frame_blocks.add(new Location(loc.getWorld(), x, (y-1), z));
+			frame_blocks.add(new Location(loc.getWorld(), (x-1), (y-1), z));
+			frame_blocks.add(new Location(loc.getWorld(), (x-2), (y-1), z));
+			frame_blocks.add(new Location(loc.getWorld(), (x+1), (y-1), z));
+
+			frame_blocks.add(new Location(loc.getWorld(), (x-2), y, z));
+			frame_blocks.add(new Location(loc.getWorld(), (x+1), y, z));
+
+			frame_blocks.add(new Location(loc.getWorld(), (x-2), (y+1), z));
+			frame_blocks.add(new Location(loc.getWorld(), (x+1), (y+1), z));
+
+			frame_blocks.add(new Location(loc.getWorld(), (x-2), (y+2), z));
+			frame_blocks.add(new Location(loc.getWorld(), (x+1), (y+2), z));
+
+			frame_blocks.add(new Location(loc.getWorld(), (x-2), (y+3), z));
+			frame_blocks.add(new Location(loc.getWorld(), (x-1), (y+3), z));
+			frame_blocks.add(new Location(loc.getWorld(), x, (y+3), z));
+			frame_blocks.add(new Location(loc.getWorld(), (x+1), (y+3), z));
+		}
+		else if ( orientation.equals("Z") )
+		{
+			//FIXME: portalrahmen ist kaputt
+			frame_blocks.add(new Location(loc.getWorld(), x, (y-1), z));
+			frame_blocks.add(new Location(loc.getWorld(), x, (y-1), (z-1)));
+			frame_blocks.add(new Location(loc.getWorld(), x, (y-1), (z-2)));
+			frame_blocks.add(new Location(loc.getWorld(), x, (y-1), (z+1)));
+
+			frame_blocks.add(new Location(loc.getWorld(), x, y, (z-2)));
+			frame_blocks.add(new Location(loc.getWorld(), x, y, (z+1)));
+
+			frame_blocks.add(new Location(loc.getWorld(), x, (y+1), (z-2)));
+			frame_blocks.add(new Location(loc.getWorld(), x, (y+1), (z+1)));
+
+			frame_blocks.add(new Location(loc.getWorld(), x, (y+2), (z-2)));
+			frame_blocks.add(new Location(loc.getWorld(), x, (y+2), (z+1)));
+
+			frame_blocks.add(new Location(loc.getWorld(), x, (y+3), (z-2)));
+			frame_blocks.add(new Location(loc.getWorld(), x, (y+3), (z-1)));
+			frame_blocks.add(new Location(loc.getWorld(), x, (y+3), z));
+			frame_blocks.add(new Location(loc.getWorld(), x, (y+3), (z+1)));
+		}
+			
+		for ( int g = 0; g < frame_blocks.size(); g++ )
+		{
+			frame_blocks.get(g).getBlock().setType(Material.GLOWSTONE);
 		}
 		
-		for ( int i = 0; i < frame_blocks.size(); i++ )
+		for ( int h = 0; h < frame_blocks.size(); h++ )
 		{
-			frame_blocks.get(i).getBlock().setType(Material.OBSIDIAN);
+			frame_blocks.get(h).getBlock().setType(Material.OBSIDIAN);
 		}
 		
 		//TODO: verhindern, dass lava zum portal fließt
 		//TODO: zusätzliche blöcke entfernen damit das portal komplett freisteht
 		List<Block> surrounding_blocks = new ArrayList<Block>();
-		surrounding_blocks.add(new Location(loc.getWorld(), x, y, (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), y, (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+1), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+1), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+2), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+2), (z+1)).getBlock());
-		
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+3), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+3), (z+1)).getBlock());
-		
-		surrounding_blocks.add(new Location(loc.getWorld(), (x+1), y, (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x+1), (y+1), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x+1), (y+2), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x+1), (y+3), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x+1), (y+4), (z+1)).getBlock());
-		
-		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+4), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+4), (z+1)).getBlock());
-		
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-2), y, (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-2), (y+1), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-2), (y+2), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-2), (y+3), (z+1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-2), (y+4), (z+1)).getBlock());
-		
-		surrounding_blocks.add(new Location(loc.getWorld(), x, y, (z-1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), y, (z-1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+1), (z-1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+1), (z-1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+2), (z-1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+2), (z-1)).getBlock());
-		
-		surrounding_blocks.add(new Location(loc.getWorld(), (x-1), (y+3), (z-1)).getBlock());
-		surrounding_blocks.add(new Location(loc.getWorld(), x, (y+3), (z-1)).getBlock());
-		
-		for ( int j = 0; j < surrounding_blocks.size(); j++ )
+		if ( orientation.equals("X") )
 		{
-			surrounding_blocks.get(j).setType(Material.GLOWSTONE);
+			int begin_x = x-3;
+			int begin_z = z-1;
+			int begin_y = y-1;
+			
+			int end_x = x+2;
+			int end_z = z+2;
+			int end_y = y+6;
+			
+			for ( int n = begin_x; n < end_x; n++ )
+			{
+				for ( int o = begin_y; o < end_y; o++ )
+				{
+					for ( int p = begin_z; p < end_z; p++ )
+					{
+						Block current_block = new Location(loc.getWorld(), n, o, p).getBlock();
+						if ( current_block.getType().equals(Material.NETHERRACK) || current_block.getType().equals(Material.SOUL_SAND) || current_block.getType().equals(Material.LAVA) )
+						{
+							surrounding_blocks.add(current_block);
+						}
+					}
+				}
+			}
 		}
-		
+		else if ( orientation.equals("Z") )
+		{
+			int begin_x = x-1;
+			int begin_z = z-3;
+			int begin_y = y-1;
+			
+			int end_x = x+2;
+			int end_z = z+2;
+			int end_y = y+6;
+			
+			for ( int n = begin_x; n < end_x; n++ )
+			{
+				for ( int o = begin_y; o < end_y; o++ )
+				{
+					for ( int p = begin_z; p < end_z; p++ )
+					{
+						Block current_block = new Location(loc.getWorld(), n, o, p).getBlock();
+						if ( current_block.getType().equals(Material.NETHERRACK) || current_block.getType().equals(Material.SOUL_SAND) || current_block.getType().equals(Material.LAVA) || current_block.getType().equals(Material.STONE) || current_block.getType().equals(Material.COBBLESTONE) || current_block.getType().equals(Material.SAND) || current_block.getType().equals(Material.DIRT) || current_block.getType().equals(Material.GRASS) || current_block.getType().equals(Material.GRAVEL) || current_block.getType().equals(Material.COAL_ORE) || current_block.getType().equals(Material.IRON_ORE) || current_block.getType().equals(Material.CLAY) || current_block.getType().equals(Material.WOOD)  || current_block.getType().equals(Material.ICE) || current_block.getType().equals(Material.DIAMOND_ORE) || current_block.getType().equals(Material.GOLD_ORE) || current_block.getType().equals(Material.EMERALD_ORE) || current_block.getType().equals(Material.NETHER_BRICK) )
+						{
+							surrounding_blocks.add(current_block);
+						}
+						/*
+						else if ( !(current_block.getType().equals(Material.AIR)) )
+						{
+							surrounding_blocks.add(current_block);
+						}
+						*/
+					}
+				}
+			}
+		}
+
+		for ( int i = 0; i < surrounding_blocks.size(); i++ )
+		{
+			surrounding_blocks.get(i).setType(Material.GLOWSTONE);
+		}
+
 		for ( int j = 0; j < surrounding_blocks.size(); j++ )
 		{
 			surrounding_blocks.get(j).setType(Material.AIR);
 		}
-		
 		
 		if ( is_safe == 1 )
 		{
@@ -958,13 +1016,13 @@ public class CmdExecutor implements CommandExecutor
 			}
 		}
 		
-		for ( int k = 0; k < portal_blocks.size(); k++ )
+		for ( int l = 0; l < portal_blocks.size(); l++ )
 		{
-			portal_blocks.get(k).getBlock().setType(Material.GLOWSTONE);
+			portal_blocks.get(l).getBlock().setType(Material.GLOWSTONE);
 		}
-		for ( int k = 0; k < portal_blocks.size(); k++ )
+		for ( int m = 0; m < portal_blocks.size(); m++ )
 		{
-			portal_blocks.get(k).getBlock().setType(Material.PORTAL);
+			portal_blocks.get(m).getBlock().setType(Material.PORTAL);
 		}
 	}
 	
@@ -1370,6 +1428,7 @@ public class CmdExecutor implements CommandExecutor
 					Location below_current_block = current_block_loc;
 					below_current_block.setY(y-1);
 					
+					//FIXME: hier werden für jedes portal 4 locations gefunden, sollten aber nur 2 sein (evtl ursache für den teleportations-bug)
 					if ( current_block.getType().equals(Material.OBSIDIAN) )
 					{
 						/*

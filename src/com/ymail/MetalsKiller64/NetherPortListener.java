@@ -1,5 +1,6 @@
 package com.ymail.MetalsKiller64;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +36,28 @@ public class NetherPortListener implements Listener
 	public void onPlayerPortalEnter(PlayerPortalEvent e)
 	{
 		Player player = e.getPlayer();
+		logger.log(Level.INFO, player.getLocation().getDirection().toString());
 		Location player_location = player.getLocation();
+		
+		float player_direction = player_location.getYaw();
+		String portal_orientation = "";
+		
+		if ( player_direction < 45 || player_direction >= 315 )
+		{
+			portal_orientation = "X";
+		}
+		else if ( player_direction >= 45 && player_direction < 135 )
+		{
+			portal_orientation = "Z";
+		}
+		else if ( player_direction >= 135 && player_direction < 225 )
+		{
+			portal_orientation = "X";
+		}
+		else if ( player_direction >= 225 && player_direction < 315 )
+		{
+			portal_orientation = "Z";
+		}
 		
 		boolean is_nether = player_location.getWorld().getEnvironment().equals(Environment.NETHER);
 		
@@ -107,7 +129,7 @@ public class NetherPortListener implements Listener
 		}
 		else
 		{
-			player.teleport(near_portal_location);
+			safeTeleport(player, near_portal_location);
 		}
 		/*
 		ConfigurationSection netherlinks = multinether.getConfig().getConfigurationSection("NetherLinks");
@@ -272,6 +294,7 @@ public class NetherPortListener implements Listener
 		
 		Location portal_location = null;
 		List<Block> portalBlocks = pce.getBlocks();
+		String portal_orientation = "";
 		for ( int i = 0; i < portalBlocks.size(); i++ )
 		{
 			logger.log(Level.INFO, "i = {0}", i);
@@ -281,10 +304,105 @@ public class NetherPortListener implements Listener
 			{
 				//z-1?
 				portal_location = current_block.getLocation();
+				//logger.log(Level.INFO, "portal_location bevor: {0}", portal_location);
+				
+				Location _x = current_block.getLocation();
+				double x1 = current_block.getLocation().getX();
+				x1 -= 1;
+				_x.setX(x1);
+				
+				Location __x = current_block.getLocation();
+				double x2 = current_block.getLocation().getX();
+				x2 -= 2;
+				__x.setX(x2);
+				
+				Location x_ = current_block.getLocation();
+				double x3 = current_block.getLocation().getX();
+				x3 += 1;
+				x_.setX(x3);
+				
+				Location x__ = current_block.getLocation();
+				double x4 = current_block.getLocation().getX();
+				x4 += 2;
+				x__.setX(x4);
+				
+				Location _z = current_block.getLocation();
+				double z1 = current_block.getLocation().getZ();
+				z1 -= 1;
+				_z.setZ(z1);
+				
+				Location __z = current_block.getLocation();
+				double z2 = current_block.getLocation().getZ();
+				z2 -= 2;
+				__z.setZ(z2);
+				
+				Location z_ = current_block.getLocation();
+				double z3 = current_block.getLocation().getZ();
+				z3 += 1;
+				z_.setZ(z3);
+				
+				Location z__ = current_block.getLocation();
+				double z4 = current_block.getLocation().getZ();
+				z4 += 2;
+				z__.setZ(z4);
+				
+				Block bx1 = _x.getBlock();
+				Block bx2 = __x.getBlock();
+				Block bx_1 = x_.getBlock();
+				Block bx_2 = x__.getBlock();
+				
+				Block bz1 = _z.getBlock();
+				Block bz2 = __z.getBlock();
+				Block bz_1 = z_.getBlock();
+				Block bz_2 = z__.getBlock();
+				
+				List<Block> x_blocks = new ArrayList<Block>();
+				x_blocks.add(bx1);
+				x_blocks.add(bx2);
+				x_blocks.add(bx_1);
+				x_blocks.add(bx_2);
+				
+				List<Block> z_blocks = new ArrayList<Block>();
+				z_blocks.add(bz1);
+				z_blocks.add(bz2);
+				z_blocks.add(bz_1);
+				z_blocks.add(bz_2);
+				
 				portal_location.setZ(portal_location.getZ() + 1);
+				//logger.log(Level.INFO, "portal_location after: {0}", portal_location);
+				
+				//logger.log(Level.INFO, "x1: {0}, x2: {1}, x3: {2}, x4: {3}, z1: {4}, z2: {5}, z3: {6}, z4: {7}", new Object[]{x1, x2, x3, x4, z1, z2, z3, z4});
+				
+				//logger.log(Level.INFO, "x, z check: {0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}", new Object[]{_x, __x, x_, x__, _z, __z, z_, z__});
+				//logger.log(Level.INFO, "_x: {0}, __x: {1}, x_: {2}, x__: {3}, _z: {4}, __z: {5}, z_: {6}, z__: {7}", new Object[]{bx1.getType(), bx2.getType(), bx_1.getType(), bx_2.getType(), bz1.getType(), bz2.getType(), bz_1.getType(), bz_2.getType()});
+				
+				for ( int j = 0; j < x_blocks.size(); j++ )
+				{
+					Block current_x_block = x_blocks.get(j);
+					if ( current_x_block.getType().equals(Material.OBSIDIAN) )
+					{
+						portal_orientation = "X";
+						break;
+					}
+				}
+				
+				if ( portal_orientation.isEmpty() )
+				{
+					for ( int k = 0; k < z_blocks.size(); k++ )
+					{
+						Block current_z_block = z_blocks.get(k);
+						if ( current_z_block.getType().equals(Material.OBSIDIAN) )
+						{
+							portal_orientation = "Z";
+							break;
+						}
+					}
+				}
 				break;
 			}
 		}
+		
+		logger.log(Level.INFO, "portal_orientation: {0}", portal_orientation);
 		
 		logger.log(Level.INFO, "portal_location: {0}", portal_location.toString());
 		Location portal_location_on_other_world = portal_location;
@@ -328,12 +446,89 @@ public class NetherPortListener implements Listener
 				is_safe = (Integer)result[1];
 			}
 			logger.log(Level.INFO, "new_portal_location: {0}" ,new_portal_location.toString());
-			cmd.buildPortalFrame(new_portal_location, is_safe);
+			if ( portal_orientation.isEmpty() )
+			{
+				portal_orientation = "X";
+			}
+			cmd.buildPortalFrame(new_portal_location, is_safe, portal_orientation);
 		}
 		else
 		{
 			logger.log(Level.INFO, "near_portal_location: {0}", near_portal_location.toString());
 			logger.log(Level.INFO, "Portal in der nähe");
+		}
+	}
+	
+	
+	public void safeTeleport(Player player, Location target_location)
+	{
+		Block target_block = target_location.getBlock();
+		World target_world = target_location.getWorld();
+		int y = target_block.getY();
+		int x = target_block.getX();
+		int z = target_block.getZ();
+		
+		List<Location> port_blocks = new ArrayList<Location>();
+		
+		port_blocks.add(new Location(target_location.getWorld(), x, y-2, z));
+		port_blocks.add(new Location(target_location.getWorld(), x, y-1, z));
+		
+		port_blocks.add(new Location(target_location.getWorld(), x-1, y-2, z));
+		port_blocks.add(new Location(target_location.getWorld(), x-1, y-1, z));
+		
+		port_blocks.add(new Location(target_location.getWorld(), x+1, y-2, z));
+		port_blocks.add(new Location(target_location.getWorld(), x+1, y-1, z));
+		
+		port_blocks.add(new Location(target_location.getWorld(), x, y-2, z-1));
+		port_blocks.add(new Location(target_location.getWorld(), x, y-1, z-1));
+		
+		port_blocks.add(new Location(target_location.getWorld(), x, y-2, z+1));
+		port_blocks.add(new Location(target_location.getWorld(), x, y-1, z+1));
+		
+		//port_blocks.add(new Location(target_location.getWorld(), x+1, y-2, z+1));
+		port_blocks.add(new Location(target_location.getWorld(), x-1, y-1, z+1));
+		
+		Block safe_block = null;
+		
+		for ( int i = 0; i < port_blocks.size(); i++ )
+		{
+			Location current_location = port_blocks.get(i);
+			Block current_block = port_blocks.get(i).getBlock();
+			int current_x = current_block.getX();
+			int current_y = current_block.getY();
+			int current_z = current_block.getZ();
+			
+			Block above = new Location(target_world, current_x, current_y+1, current_z).getBlock();
+			Block below = new Location(target_world, current_x, current_y-1, current_z).getBlock();
+			
+			if ( current_block.getType().equals(Material.AIR) || current_block.getType().equals(Material.PORTAL) )
+			{
+				if ( above.getType().equals(Material.AIR) || above.getType().equals(Material.PORTAL) )
+				{
+					safe_block = current_block;
+					break;
+				}
+				else if ( below.getType().equals(Material.AIR) || below.getType().equals(Material.PORTAL) )
+				{
+					safe_block = below;
+					break;
+				}
+			}
+		}
+		
+		if ( safe_block != null )
+		{
+			Location safe_location = safe_block.getLocation();
+			logger.log(Level.INFO, "target_location: {0}", target_location.toString());
+			logger.log(Level.INFO, "safe_location: {0}", safe_location.toString());
+			//safe_location.setZ(safe_location.getZ()+0.5);
+			//safe_location.setX(safe_location.getX()-0.5);
+			player.teleport(safe_location);
+		}
+		else
+		{
+			player.sendMessage("no suitable location found");
+			player.teleport(target_location);
 		}
 	}
 }

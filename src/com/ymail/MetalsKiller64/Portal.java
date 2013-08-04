@@ -16,7 +16,6 @@ public class Portal
 	private Integer _width;
 	private Integer _height;
 	private Integer _corresponding_id;
-	//TODO: ausrichtung speichern
     
     public Portal()
     {
