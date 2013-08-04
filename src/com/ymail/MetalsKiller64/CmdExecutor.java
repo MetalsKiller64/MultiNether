@@ -2233,10 +2233,13 @@ public class CmdExecutor implements CommandExecutor
 		logger.log(Level.INFO, ">>> getLocation <<<");
 		Object[] result = new Object[2];
 		int is_safe = 0;
-		int x = reverse_portal_location.getBlock().getX() * 8;
-		int z = reverse_portal_location.getBlock().getZ() * 8;
+		double x = reverse_portal_location.getBlock().getX() * 8;
+		double z = reverse_portal_location.getBlock().getZ() * 8;
 		int y = reverse_portal_location.getBlock().getY();
 		int y_min = y - 15;
+		
+		reverse_portal_location.setX(x);
+		reverse_portal_location.setZ(z);
 		
 		logger.log(Level.INFO, "y: {0}", y);
 		
@@ -2283,9 +2286,11 @@ public class CmdExecutor implements CommandExecutor
 	{
 		Object[] result = new Object[2];
 		int is_safe = 0;
-		float x = portal_location.getBlock().getX() / 8;
-		float z = portal_location.getBlock().getZ() / 8;
+		double x = portal_location.getBlock().getX() / 8;
+		double z = portal_location.getBlock().getZ() / 8;
 		
+		portal_location.setX(x);
+		portal_location.setZ(z);
 		/*		
 		Random random = new Random();
 		int y = random.nextInt(y_max - y_min) + y_min; //Y ist ein zufallswert zwischen 32 und 122 (von 0 bis 31 ist alles voller lava und 123 ist 5 blöcke unter der obergrenze)

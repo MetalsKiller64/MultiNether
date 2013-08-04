@@ -82,16 +82,25 @@ public class NetherPortListener implements Listener
 		}
 		
 		Location player_location_on_other_world = player_location;
+		double scale_x = player_location_on_other_world.getX();
+		double scale_z = player_location_on_other_world.getZ();
 		if ( is_nether )
 		{
 			player_location_on_other_world.setWorld(overworld);
+			scale_x = scale_x * 8;
+			scale_z = scale_z * 8;
 		}
 		else
 		{
 			player_location_on_other_world.setWorld(nether);
+			scale_x = scale_x / 8;
+			scale_z = scale_z / 8;
 		}
+		player_location_on_other_world.setX(scale_x);
+		player_location_on_other_world.setZ(scale_z);
+		logger.log(Level.INFO, "scale_x, scale_z = {0}, {1}", new Object[]{scale_x, scale_z});
+		logger.log(Level.INFO, "portal_location_on_other_world: {0}", player_location_on_other_world.toString());
 		Location near_portal_location = cmd.get_NearestPortal(player_location_on_other_world);
-		logger.log(Level.INFO, player_location_on_other_world.toString());
 		if ( near_portal_location == null )
 		{
 			logger.log(Level.INFO, "fail, kein portal gefunden");
@@ -279,16 +288,26 @@ public class NetherPortListener implements Listener
 		
 		logger.log(Level.INFO, "portal_location: {0}", portal_location.toString());
 		Location portal_location_on_other_world = portal_location;
+		double scale_x = portal_location_on_other_world.getX();
+		double scale_z = portal_location_on_other_world.getZ();
 		if ( is_nether )
 		{
 			portal_location_on_other_world.setWorld(overworld);
+			scale_x = scale_x * 8;
+			scale_z = scale_z * 8;
 		}
 		else
 		{
 			portal_location_on_other_world.setWorld(nether);
+			scale_x = scale_x / 8;
+			scale_z = scale_z / 8;
 		}
 		
+		portal_location_on_other_world.setX(scale_x);
+		portal_location_on_other_world.setZ(scale_z);
+		logger.log(Level.INFO, "scale_x, scale_z = {0}, {1}", new Object[]{scale_x, scale_z});
 		logger.log(Level.INFO, "portal_location_on_other_world: {0}", portal_location_on_other_world.toString());
+		
 		Location near_portal_location = cmd.get_NearestPortal(portal_location_on_other_world);
 		
 		if ( near_portal_location == null )
