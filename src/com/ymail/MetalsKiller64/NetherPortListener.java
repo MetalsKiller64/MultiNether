@@ -129,7 +129,7 @@ public class NetherPortListener implements Listener
 		}
 		else
 		{
-			safeTeleport(player, near_portal_location);
+			safeTeleport(player, near_portal_location, portal_orientation);
 		}
 		/*
 		ConfigurationSection netherlinks = multinether.getConfig().getConfigurationSection("NetherLinks");
@@ -460,7 +460,7 @@ public class NetherPortListener implements Listener
 	}
 	
 	
-	public void safeTeleport(Player player, Location target_location)
+	public void safeTeleport(Player player, Location target_location, String orientation)
 	{
 		Block target_block = target_location.getBlock();
 		World target_world = target_location.getWorld();
@@ -468,6 +468,125 @@ public class NetherPortListener implements Listener
 		int x = target_block.getX();
 		int z = target_block.getZ();
 		
+		Block safe_block = null;
+		
+		if ( orientation.equals("X") )
+		{
+			int begin_x = x-3;
+			int begin_z = z-1;
+			int begin_y = y-1;
+			
+			int end_x = x+2;
+			int end_z = z+2;
+			int end_y = y+3;
+			
+			for ( int h = begin_x; h < end_x; h++ )
+			{
+				for ( int j = begin_z; j < end_z; j++ )
+				{
+					for ( int i = begin_y; i < end_y; i++ )
+					{
+						Block current_block = new Location(target_location.getWorld(), h, i, j).getBlock();
+						Block block_above = new Location(target_location.getWorld(), h, i+1, j).getBlock();
+						Block block_below = new Location(target_location.getWorld(), h, i-1, j).getBlock();
+						if ( (current_block.getType().equals(Material.AIR) && block_above.getType().equals(Material.AIR)) || (current_block.getType().equals(Material.PORTAL) && block_above.getType().equals(Material.PORTAL)) )
+						{
+							Block left = new Location(target_location.getWorld(), h-1, i, j).getBlock();
+							Block right = new Location(target_location.getWorld(), h+1, i, j).getBlock();
+							if ( !(left.getType().equals(Material.AIR)) && !(left.getType().equals(Material.PORTAL)) )
+							{
+								safe_block = new Location(target_location.getWorld(), h+0.5, i, j).getBlock();
+							}
+							else if ( !(right.getType().equals(Material.AIR)) && !(right.getType().equals(Material.PORTAL)) )
+							{
+								safe_block = new Location(target_location.getWorld(), h-0.5, i, j).getBlock();
+							}
+							else
+							{
+								safe_block = current_block;
+							}
+						}
+						else if ( (current_block.getType().equals(Material.AIR) && block_below.getType().equals(Material.AIR)) || (current_block.getType().equals(Material.PORTAL) && block_below.getType().equals(Material.PORTAL)) )
+						{
+							Block left = new Location(target_location.getWorld(), h-1, i-1, j).getBlock();
+							Block right = new Location(target_location.getWorld(), h+1, i-1, j).getBlock();
+							if ( !(left.getType().equals(Material.AIR)) && !(left.getType().equals(Material.PORTAL)) )
+							{
+								safe_block = new Location(target_location.getWorld(), h+0.5, i-1, j).getBlock();
+							}
+							else if ( !(right.getType().equals(Material.AIR)) && !(right.getType().equals(Material.PORTAL)) )
+							{
+								safe_block = new Location(target_location.getWorld(), h-0.5, i-1, j).getBlock();
+							}
+							else
+							{
+								safe_block = block_below;
+							}
+						}
+					}
+				}
+			}
+		}
+		else if ( orientation.equals("Z") )
+		{
+			int begin_x = x-1;
+			int begin_z = z-3;
+			int begin_y = y-1;
+			
+			int end_x = x+2;
+			int end_z = z+2;
+			int end_y = y+3;
+			
+			for ( int h = begin_x; h < end_x; h++ )
+			{
+				for ( int j = begin_z; j < end_z; j++ )
+				{
+					for ( int i = begin_y; i < end_y; i++ )
+					{
+						Block current_block = new Location(target_location.getWorld(), h, i, j).getBlock();
+						Block block_above = new Location(target_location.getWorld(), h, i+1, j).getBlock();
+						Block block_below = new Location(target_location.getWorld(), h, i-1, j).getBlock();
+						if ( (current_block.getType().equals(Material.AIR) && block_above.getType().equals(Material.AIR)) || (current_block.getType().equals(Material.PORTAL) && block_above.getType().equals(Material.PORTAL)) )
+						{
+							Block left = new Location(target_location.getWorld(), h, i, j-1).getBlock();
+							Block right = new Location(target_location.getWorld(), h, i, j+1).getBlock();
+							if ( !(left.getType().equals(Material.AIR)) && !(left.getType().equals(Material.PORTAL)) )
+							{
+								safe_block = new Location(target_location.getWorld(), h, i, j+0.5).getBlock();
+							}
+							else if ( !(right.getType().equals(Material.AIR)) && !(right.getType().equals(Material.PORTAL)) )
+							{
+								safe_block = new Location(target_location.getWorld(), h, i, j-0.5).getBlock();
+							}
+							else
+							{
+								safe_block = current_block;
+							}
+						}
+						else if ( (current_block.getType().equals(Material.AIR) && block_below.getType().equals(Material.AIR)) || (current_block.getType().equals(Material.PORTAL) && block_below.getType().equals(Material.PORTAL)) )
+						{
+							Block left = new Location(target_location.getWorld(), h, i-1, j-1).getBlock();
+							Block right = new Location(target_location.getWorld(), h, i-1, j+1).getBlock();
+							if ( !(left.getType().equals(Material.AIR)) && !(left.getType().equals(Material.PORTAL)) )
+							{
+								safe_block = new Location(target_location.getWorld(), h, i-1, j+0.5).getBlock();
+							}
+							else if ( !(right.getType().equals(Material.AIR)) && !(right.getType().equals(Material.PORTAL)) )
+							{
+								safe_block = new Location(target_location.getWorld(), h, i-1, j-0.5).getBlock();
+							}
+							else
+							{
+								safe_block = block_below;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		
+		/*
 		List<Location> port_blocks = new ArrayList<Location>();
 		
 		port_blocks.add(new Location(target_location.getWorld(), x, y-2, z));
@@ -488,7 +607,6 @@ public class NetherPortListener implements Listener
 		//port_blocks.add(new Location(target_location.getWorld(), x+1, y-2, z+1));
 		port_blocks.add(new Location(target_location.getWorld(), x-1, y-1, z+1));
 		
-		Block safe_block = null;
 		
 		for ( int i = 0; i < port_blocks.size(); i++ )
 		{
@@ -515,6 +633,7 @@ public class NetherPortListener implements Listener
 				}
 			}
 		}
+		*/
 		
 		if ( safe_block != null )
 		{
