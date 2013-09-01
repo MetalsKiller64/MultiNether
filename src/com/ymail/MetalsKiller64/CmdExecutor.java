@@ -1391,29 +1391,29 @@ public class CmdExecutor implements CommandExecutor
 		int player_y = pb.getY();
 		int player_z = pb.getZ();
 		
-		int min_x = player_x - 10;
-		int max_x = player_x + 10;
+		int min_x = player_x - 1;
+		int max_x = player_x + 15;
 		
 		int min_y;
 		int max_y;
-		if ( player_y < 25 )
+		if ( player_y < 15 )
 		{
 			min_y = 0;
-			max_y = player_y + 25;
+			max_y = player_y + 15;
 		}
 		else if ( player_y > 245 )
 		{
-			min_y = player_y - 25;
+			min_y = player_y - 15;
 			max_y = 255;
 		}
 		else
 		{
-			min_y = player_y - 25;
-			max_y = player_y + 25;
+			min_y = player_y - 15;
+			max_y = player_y + 15;
 		}
 		
-		int min_z = player_z - 10;
-		int max_z = player_z + 10;
+		int min_z = player_z - 15;
+		int max_z = player_z + 15;
 		
 		for ( int x = min_x; x < max_x; x++ )
 		{
