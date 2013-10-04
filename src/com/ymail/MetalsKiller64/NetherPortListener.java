@@ -63,8 +63,21 @@ public class NetherPortListener implements Listener
 		
 		String entrance_world = player_location.getWorld().getName();
 		List<World> worlds = Bukkit.getWorlds();
-		String nether_name = entrance_world+"_nether";
-		String overworld_name = entrance_world.split("_")[0];
+		String overworld_name = "";
+		String nether_name = "";
+		//overworld_name = entrance_world.split("_")[0];
+		if ( entrance_world.endsWith("_nether") )
+		{
+			int ind = entrance_world.lastIndexOf("_");
+			overworld_name = new StringBuilder(entrance_world).replace(ind, ind+1,"<_>").toString();
+			overworld_name = overworld_name.split("<_>")[0];
+			nether_name = entrance_world;
+		}
+		else
+		{
+			overworld_name = entrance_world;
+			nether_name = overworld_name+"_nether";
+		}
 		
 		logger.log(Level.INFO, "entrance_world: {0}", entrance_world);
 		logger.log(Level.INFO, "nether_name: {0}", nether_name);
