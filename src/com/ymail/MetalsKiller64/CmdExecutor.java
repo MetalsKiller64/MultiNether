@@ -1177,27 +1177,10 @@ public class CmdExecutor implements CommandExecutor
 	
 	public Portal getNearActivePortal(Location l)
 	{
-		//TODO: Portale in der Nähe der Spieler-Location suchen (Suche nach Material.PORTAL)
 		Portal near_active_portal = null;
 		List<Portal> allPortals = getAllPortals();
 		List<Location> portal_locations = new ArrayList<Location>();
 		List<Block> portal_blocks_in_range = new ArrayList<Block>();
-		
-		/*Chunk c = l.getChunk();
-		 * for ( int x = 0; x <= 16; x++ )
-		 * {
-		 * for ( int y = 0; y <= 256; y++ )
-		 * {
-		 * for ( int z = 0; z <= 16; z++ )
-		 * {
-		 * Block current_block = c.getBlock(x, y, z);
-		 * if (current_block.getType().equals(Material.PORTAL))
-		 * {
-		 * portal_blocks_in_chunk.add(current_block);
-		 * }
-		 * }
-		 * }
-		 * }*/
 		
 		Block pb = l.getBlock();
 		
@@ -1275,7 +1258,6 @@ public class CmdExecutor implements CommandExecutor
 	
 	public List<Portal> getNearPortals(Location location)
 	{
-		//List<Portal> near_portals = null;
 		List<Portal> near_portals = new ArrayList<Portal>();
 		List<Portal> allPortals = getAllPortals();
 		List<Location> portal_locations = new ArrayList<Location>();
@@ -2149,144 +2131,25 @@ public class CmdExecutor implements CommandExecutor
 		return portal_id;
 	}
 	
-	public void generateNether(String worldname)
+	public boolean generateNether(String worldname)
 	{
 		Long seed = Bukkit.getWorld(worldname).getSeed();
 		World w = Bukkit.getWorld(worldname);
-		WorldCreator create_nether = new WorldCreator(worldname+"_nether");
+		String nethername = worldname+"_nether";
+		WorldCreator create_nether = new WorldCreator(nethername);
 		create_nether.type(WorldType.NORMAL);
 		create_nether.environment(Environment.NETHER);
 		create_nether.seed(seed);
 		create_nether.generateStructures(true);
 		create_nether.generator(w.getGenerator());
-		Bukkit.getWorlds().add(create_nether.createWorld());
-	}
+		Bukkit.getWorlds().add(create_nether.createWorld());	
 	
-	/*
-	public boolean openPortal(Portal p)
-	{
-		int x = p.getX();
-		int y = p.getY();
-		int z = p.getZ();
-		String world = p.getWorld();
-		//z = z-1; //FIXME: coordinate wird falsch gespeichert, oder doch nicht?? scheint manchmal zu funktionieren aber manchmal auch nicht
-		//x = x-1;
-		Location portal_location = new Location(Bukkit.getWorld(world), x, y, z);
-		Location x_minus_1 = new Location(Bukkit.getWorld(world), (x-1), y, z);
-		Location x_minus_2 = new Location(Bukkit.getWorld(world), (x-2), y, z);
-		Location x_plus_1 = new Location(Bukkit.getWorld(world), (x+1), y, z);
-		Location x_plus_2 = new Location(Bukkit.getWorld(world), (x+2), y, z);
-		Location z_minus_1 = new Location(Bukkit.getWorld(world), x, y, (z-1));
-		Location z_minus_2 = new Location(Bukkit.getWorld(world), x, y, (z-2));
-		Location z_plus_1 = new Location(Bukkit.getWorld(world), x, y, (z+1));
-		Location z_plus_2 = new Location(Bukkit.getWorld(world), x, y, (z+2));
-		List<Block> portalblocks = new ArrayList<Block>();
-		
-		if ( !(portal_location.getBlock().getType().equals(Material.AIR)) )
+		if ( Bukkit.getWorld(nethername) != null )
 		{
-			return false;
+			return true;
 		}
-		
-		int orientation = -1;
-		
-		if ( x_minus_1.getBlock().getType().equals(Material.AIR) && x_minus_2.getBlock().getType().equals(Material.OBSIDIAN) && x_plus_1.getBlock().getType().equals(Material.OBSIDIAN) )
-		{
-			portalblocks.add(portal_location.getBlock());
-			portalblocks.add(x_minus_1.getBlock());
-			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
-			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
-			if ( y_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2.getBlock().getType().equals(Material.AIR) )
-			{
-				portalblocks.add(y_plus_1.getBlock());
-				portalblocks.add(y_plus_2.getBlock());
-				Location y_plus_1_x_minus_1 = new Location(Bukkit.getWorld(world), (x-1), (y+1), z);
-				Location y_plus_2_x_minus_1 = new Location(Bukkit.getWorld(world), (x-1), (y+2), z);
-				if ( y_plus_1_x_minus_1.getBlock().getType().equals(Material.AIR) && y_plus_2_x_minus_1.getBlock().getType().equals(Material.AIR) )
-				{
-					portalblocks.add(y_plus_1_x_minus_1.getBlock());
-					portalblocks.add(y_plus_2_x_minus_1.getBlock());
-					orientation = 0;
-				}
-			}
-		}
-		else if ( x_minus_1.getBlock().getType().equals(Material.OBSIDIAN) && x_plus_1.getBlock().getType().equals(Material.AIR) && x_plus_2.getBlock().getType().equals(Material.OBSIDIAN) )
-		{
-			//FIXME: if-bedingung ändern
-			portalblocks.add(portal_location.getBlock());
-			portalblocks.add(x_plus_1.getBlock());
-			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
-			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
-			if ( y_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2.getBlock().getType().equals(Material.AIR) )
-			{
-				portalblocks.add(y_plus_1.getBlock());
-				portalblocks.add(y_plus_2.getBlock());
-				Location y_plus_1_x_plus_1 = new Location(Bukkit.getWorld(world), (x+1), (y+1), z);
-				Location y_plus_2_x_plus_1 = new Location(Bukkit.getWorld(world), (x+1), (y+2), z);
-				if ( y_plus_1_x_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2_x_plus_1.getBlock().getType().equals(Material.AIR) )
-				{
-					portalblocks.add(y_plus_1_x_plus_1.getBlock());
-					portalblocks.add(y_plus_2_x_plus_1.getBlock());
-					orientation = 1;
-				}
-			}
-		}
-		else if ( z_minus_1.getBlock().getType().equals(Material.AIR) && z_minus_2.getBlock().getType().equals(Material.OBSIDIAN) && z_plus_1.getBlock().getType().equals(Material.OBSIDIAN) )
-		{
-			portalblocks.add(portal_location.getBlock());
-			portalblocks.add(z_minus_1.getBlock());
-			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
-			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
-			if ( y_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2.getBlock().getType().equals(Material.AIR) )
-			{
-				portalblocks.add(y_plus_1.getBlock());
-				portalblocks.add(y_plus_2.getBlock());
-				Location y_plus_1_z_minus_1 = new Location(Bukkit.getWorld(world), x, (y+1), (z-1));
-				Location y_plus_2_z_minus_1 = new Location(Bukkit.getWorld(world), x, (y+2), (z-1));
-				if ( y_plus_1_z_minus_1.getBlock().getType().equals(Material.AIR) && y_plus_2_z_minus_1.getBlock().getType().equals(Material.AIR) )
-				{
-					portalblocks.add(y_plus_1_z_minus_1.getBlock());
-					portalblocks.add(y_plus_2_z_minus_1.getBlock());
-					orientation = 2;
-				}
-			}
-		}
-		else if ( z_minus_1.getBlock().getType().equals(Material.OBSIDIAN) && z_plus_1.getBlock().getType().equals(Material.AIR) && z_plus_2.getBlock().getType().equals(Material.OBSIDIAN) )
-		{
-			portalblocks.add(portal_location.getBlock());
-			portalblocks.add(z_plus_1.getBlock());
-			Location y_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), z);
-			Location y_plus_2 = new Location(Bukkit.getWorld(world), x, (y+2), z);
-			if ( y_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2.getBlock().getType().equals(Material.AIR) )
-			{
-				portalblocks.add(y_plus_1.getBlock());
-				portalblocks.add(y_plus_2.getBlock());
-				Location y_plus_1_z_plus_1 = new Location(Bukkit.getWorld(world), x, (y+1), (z+1));
-				Location y_plus_2_z_plus_1 = new Location(Bukkit.getWorld(world), x, (y+2), (z+1));
-				if ( y_plus_1_z_plus_1.getBlock().getType().equals(Material.AIR) && y_plus_2_z_plus_1.getBlock().getType().equals(Material.AIR) )
-				{
-					portalblocks.add(y_plus_1_z_plus_1.getBlock());
-					portalblocks.add(y_plus_2_z_plus_1.getBlock());
-					orientation = 3;
-				}
-			}
-		}
-		
-		if ( portalblocks.isEmpty() )
-		{
-			return false;
-		}
-		
-		for ( int i = 0; i < portalblocks.size(); i++ )
-		{
-			portalblocks.get(i).setType(Material.GLOWSTONE);
-		}
-		for ( int i = 0; i < portalblocks.size(); i++ )
-		{
-			portalblocks.get(i).setType(Material.PORTAL);
-		}
-		return true;
+		return false;
 	}
-	*/
 	
 	public Object[] getLocation(Location reverse_portal_location)
 	{
