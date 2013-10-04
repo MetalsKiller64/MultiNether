@@ -26,6 +26,7 @@ import org.bukkit.entity.Player;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MVWorldManager;
 import com.onarandombox.MultiverseCore.utils.WorldManager;
+import java.util.HashSet;
 import org.bukkit.util.Vector;
 
 //import java.util.Arrays;
@@ -2390,4 +2391,107 @@ public class CmdExecutor implements CommandExecutor
 		result[1] = is_safe;
 		return result;
 	}
+	
+	
+	public Location findPortal(String World, Location start_location)
+	{
+		int count = 0;
+		int steps = 0;
+		int center_steps = 0;
+		int a = 129;
+		int start_x = start_location.getBlockX();
+		int start_y = start_location.getBlockY();
+		int start_z = start_location.getBlockZ();
+		List<Block> found_blocks = new ArrayList<Block>();
+		
+		for ( int radius = 0; radius < (a / 2) + 1; radius++ )
+		{
+			int low = start_y - radius;
+			int high = start_y + radius;
+			int low_x = start_x - radius;
+			int high_x = start_x + radius;
+			int low_z = start_z - radius;
+			int high_z = start_z + radius;
+			//logger.log(Level.INFO, "low high y: {0} {1}", new Object[]{low, high});
+			//logger.log(Level.INFO, "low high x: {0} {1}", new Object[]{low_x, high_x});
+			//logger.log(Level.INFO, "low high z: {0} {1}", new Object[]{low_z, high_z});
+			HashSet<Integer> set = new HashSet<Integer>();
+			set.add(low);
+			set.add(high);
+			
+			//logger.log(Level.INFO, "loop #1");
+			for ( int y : set )
+			{
+				for ( int x = low_x; x < high_x+1; x++)
+				{
+					for ( int z = low_z; z < high_z+1; z++)
+					{
+						steps += 1;
+						//logger.log(Level.INFO, "x, y, z: {0}_{1}_{2}", new Object[]{x, y, z});
+						Location current_location = new Location(Bukkit.getWorld(World), x, y, z);
+						Block current_block = current_location.getBlock();
+						//logger.log(Level.INFO, "x, y, z: {0}, {1}, {2}",new Object[]{x, y, z});
+						if ( current_block.getType().equals(Material.PORTAL) )
+						{
+							found_blocks.add(current_block);
+							logger.log(Level.INFO, "Portalblock found at: {0}, {1}, {2}, after {3} steps!", new Object[]{x, y, z, steps});
+						}
+					}
+				}
+			}
+			
+			set.clear();
+			set.add(low_x);
+			set.add(high_x);
+			
+			//logger.log(Level.INFO, "loop #2");
+			for ( int y2 = low+1; y2 < high+1-1; y2++)
+			{
+				for ( int x2 : set )
+				{
+					for ( int z2 = low_z; z2 < high_z+1; z2++ )
+					{
+						steps += 1;
+						//logger.log(Level.INFO, "x2, y2, z2: {0}_{1}_{2}", new Object[]{x2, y2, z2});
+						Location current_location = new Location(Bukkit.getWorld(World), x2, y2, z2);
+						Block current_block = current_location.getBlock();
+						//logger.log(Level.INFO, "x, y, z: {0}, {1}, {2}",new Object[]{x2, y2, z2});
+						if ( current_block.getType().equals(Material.PORTAL) )
+						{
+							found_blocks.add(current_block);
+							logger.log(Level.INFO, "Portalblock found at: {0}, {1}, {2}, after {3} steps!", new Object[]{x2, y2, z2, steps});
+						}
+					}
+				}
+			}
+			
+			set.clear();
+			set.add(low_z);
+			set.add(high_z);
+			//logger.log(Level.INFO, "loop #3");
+			for ( int y3 = low+1; y3 < high+1-1; y3++ )
+			{
+				for ( int x3 = low_x+1; x3 < high_x+1-1; x3++ )
+				{
+					for ( int z3 : set )
+					{
+						steps += 1;
+						//logger.log(Level.INFO, "x3, y3, z3: {0}_{1}_{2}", new Object[]{x3, y3, z3});
+						Location current_location = new Location(Bukkit.getWorld(World), x3, y3, z3);
+						Block current_block = current_location.getBlock();
+						//logger.log(Level.INFO, "x, y, z: {0}, {1}, {2}",new Object[]{x3, y3, z3});
+						if ( current_block.getType().equals(Material.PORTAL) )
+						{
+							found_blocks.add(current_block);
+							logger.log(Level.INFO, "Portalblock found at: {0}, {1}, {2}, after {3} steps!", new Object[]{x3, y3, z3, steps});
+						}
+					}
+				}
+			}
+		}
+		//logger.log(Level.INFO, "steps: {0}", steps);
+		int last_block = found_blocks.size() - 1;
+		return found_blocks.get(last_block).getLocation();
+	}
+	
 }
