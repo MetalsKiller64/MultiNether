@@ -1542,6 +1542,7 @@ public class CmdExecutor implements CommandExecutor
 	
 	public Portal getNearestPortal(Location location)
 	{
+		//TODO: ersetzen durch neuen Algorithmus in findPortal (getNearPortals und getAllPortals sind obsolet)
 		List<Portal> near_portals = getNearPortals(location);
 		String world = location.getWorld().getName();
 		List<Location> portal_locations = new ArrayList<Location>();
@@ -2353,8 +2354,25 @@ public class CmdExecutor implements CommandExecutor
 			}
 		}
 		//logger.log(Level.INFO, "steps: {0}", steps);
-		int last_block = found_blocks.size() - 1;
-		return found_blocks.get(last_block).getLocation();
+		Block target_block;
+		if ( found_blocks.size() == 0 )
+		{
+			return null;
+		}
+		double prev_y = 130;
+		Block prev_block = found_blocks.get(0);
+		for ( int i = 0; i < 6; i++ )
+		{
+			Block current_block = found_blocks.get(i);
+			double current_y = current_block.getLocation().getY();
+			if ( prev_y == 130 || prev_y > current_y )
+			{
+				prev_y = current_y;
+				prev_block = current_block;
+			}
+		}
+		target_block = prev_block;
+		return target_block.getLocation();
 	}
 	
 }
