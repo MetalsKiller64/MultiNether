@@ -2297,8 +2297,14 @@ public class CmdExecutor implements CommandExecutor
 						//logger.log(Level.INFO, "x, y, z: {0}, {1}, {2}",new Object[]{x, y, z});
 						if ( current_block.getType().equals(Material.PORTAL) )
 						{
-							found_blocks.add(current_block);
-							logger.log(Level.INFO, "Portalblock found at: {0}, {1}, {2}, after {3} steps!", new Object[]{x, y, z, steps});
+							Location location_below = current_location;
+							location_below.setY(current_location.getY()-1);
+							Block block_below = location_below.getBlock();
+							if ( block_below.getType().equals(Material.OBSIDIAN) )
+							{
+								found_blocks.add(current_block);
+								logger.log(Level.INFO, "Portalblock found at: {0}, {1}, {2}, after {3} steps!", new Object[]{x, y, z, steps});
+							}
 						}
 					}
 				}
@@ -2322,8 +2328,14 @@ public class CmdExecutor implements CommandExecutor
 						//logger.log(Level.INFO, "x, y, z: {0}, {1}, {2}",new Object[]{x2, y2, z2});
 						if ( current_block.getType().equals(Material.PORTAL) )
 						{
-							found_blocks.add(current_block);
-							logger.log(Level.INFO, "Portalblock found at: {0}, {1}, {2}, after {3} steps!", new Object[]{x2, y2, z2, steps});
+							Location location_below = current_location;
+							location_below.setY(current_location.getY()-1);
+							Block block_below = location_below.getBlock();
+							if ( block_below.getType().equals(Material.OBSIDIAN) )
+							{
+								found_blocks.add(current_block);
+								logger.log(Level.INFO, "Portalblock found at: {0}, {1}, {2}, after {3} steps!", new Object[]{x2, y2, z2, steps});
+							}
 						}
 					}
 				}
@@ -2346,8 +2358,14 @@ public class CmdExecutor implements CommandExecutor
 						//logger.log(Level.INFO, "x, y, z: {0}, {1}, {2}",new Object[]{x3, y3, z3});
 						if ( current_block.getType().equals(Material.PORTAL) )
 						{
-							found_blocks.add(current_block);
-							logger.log(Level.INFO, "Portalblock found at: {0}, {1}, {2}, after {3} steps!", new Object[]{x3, y3, z3, steps});
+							Location location_below = current_location;
+							location_below.setY(current_location.getY()-1);
+							Block block_below = location_below.getBlock();
+							if ( block_below.getType().equals(Material.OBSIDIAN) )
+							{
+								found_blocks.add(current_block);
+								logger.log(Level.INFO, "Portalblock found at: {0}, {1}, {2}, after {3} steps!", new Object[]{x3, y3, z3, steps});
+							}
 						}
 					}
 				}
@@ -2360,6 +2378,8 @@ public class CmdExecutor implements CommandExecutor
 			return null;
 		}
 		double prev_y = 130;
+		
+		/*
 		Block prev_block = found_blocks.get(0);
 		for ( int i = 0; i < 6; i++ )
 		{
@@ -2371,7 +2391,9 @@ public class CmdExecutor implements CommandExecutor
 				prev_block = current_block;
 			}
 		}
-		target_block = prev_block;
+		*/
+		//target_block = prev_block;
+		target_block = found_blocks.get(0);
 		return target_block.getLocation();
 	}
 	
