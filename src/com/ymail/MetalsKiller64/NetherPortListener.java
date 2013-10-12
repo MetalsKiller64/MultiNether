@@ -42,6 +42,7 @@ public class NetherPortListener implements Listener
 		float player_direction = player_location.getYaw();
 		String portal_orientation = "";
 		
+		//FIXME: hier gibts ein Problem wenn der Spieler seitlich das Portal betritt (falsche Blickrichtung)
 		if ( player_direction < 45 || player_direction >= 315 )
 		{
 			portal_orientation = "X";
@@ -98,7 +99,7 @@ public class NetherPortListener implements Listener
 			}
 			if ( nether == null )
 			{
-				//kein nether vorhanden
+				//hier muss ein Nether generiert werden (die Funktion ist aber noch nicht fertig)
 			}
 		}
 		else
@@ -135,7 +136,8 @@ public class NetherPortListener implements Listener
 		player_location_on_other_world.setZ(scale_z);
 		logger.log(Level.INFO, "scale_x, scale_z = {0}, {1}", new Object[]{scale_x, scale_z});
 		logger.log(Level.INFO, "portal_location_on_other_world: {0}", player_location_on_other_world.toString());
-		Location near_portal_location = cmd.get_NearestPortal(player_location_on_other_world);
+		//Location near_portal_location = cmd.get_NearestPortal(player_location_on_other_world);
+		Location near_portal_location = cmd.findPortal(player_location_on_other_world.getWorld().getName(), player_location_on_other_world);
 		if ( near_portal_location == null )
 		{
 			logger.log(Level.INFO, "fail, kein portal gefunden");
@@ -287,7 +289,14 @@ public class NetherPortListener implements Listener
 			}
 			if ( nether == null )
 			{
-				//kein nether vorhanden
+				if ( cmd.generateNether(overworld_name) )
+				{
+					logger.log(Level.INFO, "new nether '{0}' has been created for world '{1}'", new Object[]{nether_name, overworld_name});
+				}
+				else
+				{
+					logger.log(Level.SEVERE, "could not create nether '{0}' for world '{1}!'", new Object[]{nether_name, overworld_name});
+				}
 			}
 		}
 		else
