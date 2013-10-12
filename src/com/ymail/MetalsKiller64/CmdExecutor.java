@@ -816,6 +816,7 @@ public class CmdExecutor implements CommandExecutor
 	public void buildPortalFrame(Location loc, Integer is_safe, String orientation)
 	{
 		//TODO: portal ausrichtung
+		logger.log(Level.INFO, "is_safe: {0}", is_safe);
 		logger.log(Level.INFO, "baue portal-rahmen bei {0}...", loc.toString());
 		Block loc_block = loc.getBlock();
 		int y = loc_block.getY();
@@ -913,7 +914,26 @@ public class CmdExecutor implements CommandExecutor
 		}
 		
 		//TODO: verhindern, dass lava zum portal fließt
-		//TODO: zusätzliche blöcke entfernen damit das portal komplett freisteht
+		List<Material> m_list = new ArrayList<Material>();
+		m_list.add(Material.NETHERRACK);
+		m_list.add(Material.SOUL_SAND);
+		m_list.add(Material.LAVA);
+		m_list.add(Material.STONE);
+		m_list.add(Material.COBBLESTONE);
+		m_list.add(Material.SAND);
+		m_list.add(Material.DIRT);
+		m_list.add(Material.GRASS);
+		m_list.add(Material.GRAVEL);
+		m_list.add(Material.COAL_ORE);
+		m_list.add(Material.IRON_ORE);
+		m_list.add(Material.CLAY);
+		m_list.add(Material.WOOD);
+		m_list.add(Material.ICE);
+		m_list.add(Material.DIAMOND_ORE);
+		m_list.add(Material.GOLD_ORE);
+		m_list.add(Material.EMERALD_ORE);
+		m_list.add(Material.NETHER_BRICK);
+		
 		List<Block> surrounding_blocks = new ArrayList<Block>();
 		if ( orientation.equals("X") )
 		{
@@ -921,7 +941,7 @@ public class CmdExecutor implements CommandExecutor
 			int begin_z = z-1;
 			int begin_y = y-1;
 			
-			int end_x = x+2;
+			int end_x = x+3;
 			int end_z = z+2;
 			int end_y = y+6;
 			
@@ -932,7 +952,7 @@ public class CmdExecutor implements CommandExecutor
 					for ( int p = begin_z; p < end_z; p++ )
 					{
 						Block current_block = new Location(loc.getWorld(), n, o, p).getBlock();
-						if ( current_block.getType().equals(Material.NETHERRACK) || current_block.getType().equals(Material.SOUL_SAND) || current_block.getType().equals(Material.LAVA) )
+						if ( m_list.contains(current_block.getType()) )
 						{
 							surrounding_blocks.add(current_block);
 						}
@@ -947,7 +967,7 @@ public class CmdExecutor implements CommandExecutor
 			int begin_y = y-1;
 			
 			int end_x = x+2;
-			int end_z = z+2;
+			int end_z = z+3;
 			int end_y = y+6;
 			
 			for ( int n = begin_x; n < end_x; n++ )
@@ -957,7 +977,7 @@ public class CmdExecutor implements CommandExecutor
 					for ( int p = begin_z; p < end_z; p++ )
 					{
 						Block current_block = new Location(loc.getWorld(), n, o, p).getBlock();
-						if ( current_block.getType().equals(Material.NETHERRACK) || current_block.getType().equals(Material.SOUL_SAND) || current_block.getType().equals(Material.LAVA) || current_block.getType().equals(Material.STONE) || current_block.getType().equals(Material.COBBLESTONE) || current_block.getType().equals(Material.SAND) || current_block.getType().equals(Material.DIRT) || current_block.getType().equals(Material.GRASS) || current_block.getType().equals(Material.GRAVEL) || current_block.getType().equals(Material.COAL_ORE) || current_block.getType().equals(Material.IRON_ORE) || current_block.getType().equals(Material.CLAY) || current_block.getType().equals(Material.WOOD)  || current_block.getType().equals(Material.ICE) || current_block.getType().equals(Material.DIAMOND_ORE) || current_block.getType().equals(Material.GOLD_ORE) || current_block.getType().equals(Material.EMERALD_ORE) || current_block.getType().equals(Material.NETHER_BRICK) )
+						if ( m_list.contains(current_block.getType()) )
 						{
 							surrounding_blocks.add(current_block);
 						}
