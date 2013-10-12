@@ -2241,14 +2241,14 @@ public class CmdExecutor implements CommandExecutor
 		portal_location.setY(y);
 		*/
 		int y = portal_location.getBlockY();
-		int y_min = y-15;
+		int y_min = 32;
+		Location above = portal_location;
+		Location below = portal_location;
+		above.setY(y+1);
+		below.setY(y-1);
 		
 		if ( portal_location.getBlock().getType().equals(Material.LAVA) ) //wenn die location trotzdem lava ist (z.B in einem lavafall)
 		{
-			Location above = portal_location;
-			Location below = portal_location;
-			above.setY(y+1);
-			below.setY(y-1);
 			if ( !(above.getBlock().getType().equals(Material.LAVA)) && below.getBlock().getType().equals(Material.LAVA) )
 			{
 				is_safe = -1;
@@ -2260,15 +2260,44 @@ public class CmdExecutor implements CommandExecutor
 		}
 		else if ( portal_location.getBlock().getType().equals(Material.AIR) )
 		{
+			logger.log(Level.INFO, "debug1");
+			boolean changed = false;
 			for ( int i = y; i > y_min; i-- )
 			{
 				Location l = portal_location;
 				l.setY(i-1);
 				if ( l.getBlock().getType().equals(Material.NETHERRACK) || l.getBlock().getType().equals(Material.SOUL_SAND) )
 				{
+					logger.log(Level.INFO, "debug2");
 					is_safe = 0;
 					portal_location.setY(i);
+					changed = true;
+					break;
 				}
+				else if ( l.getBlock().getType().equals(Material.LAVA) )
+				{
+					logger.log(Level.INFO, "debug3");
+					is_safe = -1;
+					portal_location.setY(i);
+					changed = true;
+					break;
+				}
+			}
+			if ( !(changed) )
+			{
+				is_safe = -1;
+				portal_location.setY(32);
+			}
+		}
+		else
+		{
+			if ( above.getBlock().getType().equals(Material.LAVA) )
+			{
+				is_safe = 1;
+			}
+			else if ( below.getBlock().getType().equals(Material.LAVA) )
+			{
+				is_safe = -1;
 			}
 		}
 		result[0] = portal_location;
