@@ -2163,8 +2163,23 @@ public class CmdExecutor implements CommandExecutor
 		create_nether.seed(seed);
 		create_nether.generateStructures(true);
 		create_nether.generator(w.getGenerator());
-		Bukkit.getWorlds().add(create_nether.createWorld());	
-	
+		Bukkit.getWorlds().add(create_nether.createWorld()); //generiert den Nether und fügt ihn der Bukkit-Weltenlist hinzu
+		
+		MultiverseCore mv = new MultiverseCore();
+		if ( Bukkit.getWorld(nethername) != null )
+		{
+			//sollte den Nether in MV importieren (NullPointerException)
+			mv.getMVWorldManager().addWorld(worldname, Environment.NETHER, seed.toString(), WorldType.NORMAL, Boolean.TRUE, "");
+		}
+		try
+		{
+			mv.getMVWorldManager().getMVWorld(worldname).getName();
+		}
+		catch (Exception e)
+		{
+			logger.log(Level.SEVERE, e.toString());
+			return false;
+		}
 		if ( Bukkit.getWorld(nethername) != null )
 		{
 			return true;
